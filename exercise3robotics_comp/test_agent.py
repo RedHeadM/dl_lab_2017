@@ -59,7 +59,7 @@ def test_model(opt = Options(),mdl_load_name='my_model.h5'):
         if state.terminal or epi_step >= opt.early_stop:
             if state.terminal:
                 nepisodes_solved += 1
-            print("astar_num_steps: {} agent steps: {} ".format(astar_num_steps,epi_step))
+            # print("astar_num_steps: {} agent steps: {} ".format(astar_num_steps,epi_step))
             astar_num_steps_arr.append(astar_num_steps)
             agent_num_steps_arr.append(epi_step)
             nepisodes += 1
@@ -104,10 +104,12 @@ def test_model(opt = Options(),mdl_load_name='my_model.h5'):
     astar_num_steps_arr=np.array(astar_num_steps_arr)
     astar_num_steps_arr[astar_num_steps_arr == None] = 0 #set to zero if start was on goal
     #only compute mead diff to astare where goal found
-    agent_num_steps_arr=agent_num_steps_arr[agent_num_steps_arr< opt.early_stop]
-    astar_num_steps_arr=astar_num_steps_arr[agent_num_steps_arr< opt.early_stop]
-    print("agent_num_steps_arr: {}".format(agent_num_steps_arr))
-    print("astar_num_steps_arr: {}".format(astar_num_steps_arr))
+
+    print("sahpe form ",astar_num_steps_arr.shape)
+    astar_num_steps_arr = astar_num_steps_arr[agent_num_steps_arr< opt.early_stop]
+    print("sahpe to",astar_num_steps_arr.shape)
+    #change after astar_num_steps_arr
+    agent_num_steps_arr = agent_num_steps_arr[agent_num_steps_arr< opt.early_stop]
     astar_diff = np.mean(agent_num_steps_arr-astar_num_steps_arr)
     print("avg diff to astar: {}".format(astar_diff))
     return [success_rate, astar_diff]

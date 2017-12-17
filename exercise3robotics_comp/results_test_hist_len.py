@@ -92,6 +92,7 @@ def plt_pob_siz_results(plt_file_name = None):
 
 
 if __name__ == "__main__":
-    # plt_hist_len_results()
-    plt_hist_len_results("hist_len")
+    #change opt.change_tgt = True #rand goal pos if true
+    #change opt.map_ind = 1/0 for the differnt map
+    plt_hist_len_results("hist_len_fixed_goal_map_0_pob_siz_5")
     # plt_pob_siz_results("pob_siz")

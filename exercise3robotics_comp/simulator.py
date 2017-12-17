@@ -233,9 +233,7 @@ class Simulator:
     # interfacing funcs
 
     def newGame(self, tgt_y, tgt_x):
-        #add boarder offsets
-        tgt_y+= self.pob_siz
-        tgt_x+= self.pob_siz
+
         # 0. setting up
         if self.obj_pos[self.bot_ind][0] != -1 and self.obj_pos[self.bot_ind][1] != -1:
             self.bot_pos_old[0] = self.obj_pos[self.bot_ind][0]
@@ -245,6 +243,9 @@ class Simulator:
             self.tgt_pos_old[1] = self.obj_pos[self.tgt_ind][1]
         # 1. assign tgt position
         if tgt_y != None and tgt_x != None:
+            #add boarder offsets
+            tgt_y+= self.pob_siz
+            tgt_x+= self.pob_siz
             self.obj_pos[self.tgt_ind][0] = tgt_y
             self.obj_pos[self.tgt_ind][1] = tgt_x
         else:
