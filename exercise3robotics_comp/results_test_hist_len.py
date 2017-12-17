@@ -24,7 +24,7 @@ def plt_hist_len_results(plt_file_name = None):
             # except AttributeError:
             #     print ("AttributeError")
 
-            train_model(opt, mdl_name,epochs=1)
+            train_model(opt, mdl_name,epochs=10)
             [success_rate, astar_diff] = test_model(opt,mdl_name)
             results_success_rate.append(success_rate)
             results_astar_diff.append(astar_diff)
