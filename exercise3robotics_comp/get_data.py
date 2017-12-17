@@ -12,7 +12,7 @@ def get_data(opt = Options()):
 
     # Note I am forcing the display to be off here to make data collection fast
     # you can turn it on again for debugging purposes
-    opt.disp_on = False
+    # opt.disp_on = False
 
     # 1. control loop
     if opt.disp_on:

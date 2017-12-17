@@ -102,6 +102,10 @@ def test_model(opt = Options(),mdl_load_name='my_model.h5'):
 
     agent_num_steps_arr=np.array(agent_num_steps_arr)
     astar_num_steps_arr=np.array(astar_num_steps_arr)
+    astar_num_steps_arr[astar_num_steps_arr == None] = 0 #set to zero if start was on goal
+    #only compute mead diff to astare where goal found
+    agent_num_steps_arr=agent_num_steps_arr[agent_num_steps_arr< opt.early_stop]
+    astar_num_steps_arr=astar_num_steps_arr[agent_num_steps_arr< opt.early_stop]
     print("agent_num_steps_arr: {}".format(agent_num_steps_arr))
     print("astar_num_steps_arr: {}".format(astar_num_steps_arr))
     astar_diff = np.mean(agent_num_steps_arr-astar_num_steps_arr)

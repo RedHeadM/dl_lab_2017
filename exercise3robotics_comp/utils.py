@@ -2,37 +2,36 @@ import numpy as np
 
 class Options:
     #
-    disp_on = True # you might want to set it to False for speed
-    map_ind = 0
-    change_tgt = False
+    disp_on = False # you might want to set it to False for speed
+    map_ind = 1
+    change_tgt = False #rand goal pos if true
     states_fil = "states.csv"
     labels_fil = "labels.csv"
     network_fil = "network.json"
     weights_fil = "network.h5"
     # simulator config
     disp_interval = .005
-
+    cub_siz = 5
+    pob_siz = 5     # for partial observation
     # run get_data if cub_siz or pob_siz is changed
     if map_ind == 0:
-        cub_siz = 5
-        pob_siz = 5 # for partial observation
+
         # this defines the goal positionw
         tgt_y = 12 #12
         tgt_x = 11 #11
         early_stop = 50
     elif map_ind == 1:
-        cub_siz = 5#10
-        pob_siz = 5#3 # for partial observation
         # this defines the goal positionw
         tgt_y = 5
         tgt_x = 5
         early_stop = 75
+    assert not pob_siz %2 ==0,"pob_siz must be not even"
     state_siz = (pob_siz * cub_siz) ** 2 # when use pob as input
     if change_tgt:
         tgt_y = None
         tgt_x = None
     act_num = 5
-
+    # [3,5,7,11,13]
     # traing hyper params
     hist_len = 3
     minibatch_size  = 32
