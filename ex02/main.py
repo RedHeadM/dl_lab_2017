@@ -96,10 +96,10 @@ if __name__ == "__main__":
     # cnn2.train_mnist(batch_size = 128, epochs = 10, lr =1e-3, tf_opt = tf.train.AdamOptimizer)
 
     lr =[1e-1,1e-2,1e-3,1e-4]
-    #plt_different_learning_rates(lr, tf.train.GradientDescentOptimizer,drop_out = False, filter_num = 16,file_name="lr_no_drop_out_16_filter_gd")
-    #plt_different_learning_rates(lr, tf.train.GradientDescentOptimizer,drop_out = True, filter_num = 16, file_name="lr_with_drop_out_16_filter_gd")
-    #plt_different_learning_rates(lr, tf.train.AdamOptimizer,drop_out = True, filter_num = 16,file_name="lr_with_drop_out_16_filter_adam")
-    # plt.show()
+    plt_different_learning_rates(lr, tf.train.GradientDescentOptimizer,drop_out = False, filter_num = 16,file_name="lr_no_drop_out_16_filter_gd")
+    plt_different_learning_rates(lr, tf.train.GradientDescentOptimizer,drop_out = True, filter_num = 16, file_name="lr_with_drop_out_16_filter_gd")
+    plt_different_learning_rates(lr, tf.train.AdamOptimizer,drop_out = True, filter_num = 16,file_name="lr_with_drop_out_16_filter_adam")
+    plt.show()
 
 
     # training samples 10000 set in SmallLeNet
@@ -111,13 +111,14 @@ if __name__ == "__main__":
     # plt_runtime_rates(ax[1], drop_out = True, filter_num_array =filter_num, batch_size = batch_size)
     # ax[1].set_title("with dropout")
     # f.savefig( "runtime_train_samples_10000_batch_size_64.pdf")
-    batch_size = 16
-    f, ax = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(11.69,4.27))
-    plt_runtime_rates(ax[0], drop_out = False, filter_num_array =filter_num, batch_size = batch_size)
-    ax[0].set_title("no dropout")
-    plt_runtime_rates(ax[1], drop_out = True, filter_num_array =filter_num, batch_size = batch_size)
-    ax[1].set_title("with dropout")
-    
+
+    # batch_size = 16
+    # f, ax = plt.subplots(1, 2, sharex=True, sharey=True, figsize=(11.69,4.27))
+    # plt_runtime_rates(ax[0], drop_out = False, filter_num_array =filter_num, batch_size = batch_size)
+    # ax[0].set_title("no dropout")
+    # plt_runtime_rates(ax[1], drop_out = True, filter_num_array =filter_num, batch_size = batch_size)
+    # ax[1].set_title("with dropout")
+
     f.savefig( "runtime_train_samples_10000_batch_size_16.pdf")
 
     #

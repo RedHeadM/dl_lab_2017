@@ -12,7 +12,7 @@ labels = np.zeros([opt.data_steps], int)
 
 # Note I am forcing the display to be off here to make data collection fast
 # you can turn it on again for debugging purposes
-opt.disp_on = True
+opt.disp_on = False
 
 # 1. control loop
 if opt.disp_on:
@@ -39,7 +39,7 @@ for step in range(opt.data_steps):
     if step % opt.prog_freq == 0:
         print(step)
 
-    if False:
+    if opt.disp_on:
         if win_all is None:
             import pylab as pl
             pl.figure()
