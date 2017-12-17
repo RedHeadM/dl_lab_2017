@@ -85,7 +85,7 @@ model.add(Conv2D(128, (3, 3), activation='relu'))
 #model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())
 model.add(Dense(1000, activation='relu'))
-# model.add(Dropout(0.2))
+model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='softmax'))
 
 #keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
