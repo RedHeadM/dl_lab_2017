@@ -3,7 +3,7 @@ import numpy as np
 class Options:
     #
     disp_on = True # you might want to set it to False for speed
-    map_ind = 0
+    map_ind = 1
     change_tgt = False
     states_fil = "states.csv"
     labels_fil = "labels.csv"
@@ -19,8 +19,8 @@ class Options:
         tgt_x = 11 #11
         early_stop = 50
     elif map_ind == 1:
-        cub_siz = 10#10
-        pob_siz = 3#3 # for partial observation
+        cub_siz = 5#10#10
+        pob_siz = 3#3#3 # for partial observation
         # this defines the goal positionw
         tgt_y = 5
         tgt_x = 5
@@ -54,7 +54,7 @@ class State: # return tuples made easy
 
 # The following functions were taken from scikit-image
 # https://github.com/scikit-image/scikit-image/blob/master/skimage/color/colorconv.py
-        
+
 def rgb2gray(rgb):
     if rgb.ndim == 2:
         return np.ascontiguousarray(rgb)

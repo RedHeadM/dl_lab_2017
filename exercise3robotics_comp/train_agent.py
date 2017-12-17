@@ -8,7 +8,7 @@ from transitionTable import TransitionTable
 
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Activation, Flatten
+from keras.layers import Dense, Activation, Flatten, Dropout
 from keras.layers import Conv2D, MaxPooling2D
 
 from keras import optimizers
@@ -36,7 +36,7 @@ trans = TransitionTable(opt.state_siz, opt.act_num, opt.hist_len,
 # # both train_data and valid_data contain tupes of images and labels
 # train_data = trans.get_train()
 # valid_data = trans.get_valid()
-# 
+#
 # alternatively you can get one random mini batch line this
 #
 # for i in range(number_of_batches):
@@ -85,6 +85,7 @@ model.add(Conv2D(128, (3, 3), activation='relu'))
 #model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Flatten())
 model.add(Dense(1000, activation='relu'))
+# model.add(Dropout(0.2))
 model.add(Dense(num_classes, activation='softmax'))
 
 #keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
@@ -102,10 +103,9 @@ model.fit(train_shaped, train_labels,
           verbose=1,
           validation_data=(valid_shaped, valid_labels),
           callbacks=[history])
-              
-            
+
+
 
 
 # 2. save your trained model
 model.save('my_model.h5')
-
