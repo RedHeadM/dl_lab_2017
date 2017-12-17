@@ -53,15 +53,15 @@ print("train data shape {}",train_labels.shape)
 print("valid data shape {}",valid_states.shape)
 print("valid data shape {}",valid_labels.shape)
 
-train_shaped = train_states.reshape(train_states.shape[0], 25, 25, opt.hist_len)
-valid_shaped = valid_states.reshape(valid_states.shape[0], 25, 25, opt.hist_len)
+train_shaped = train_states.reshape(train_states.shape[0], opt.cub_siz*opt.pob_siz, opt.cub_siz*opt.pob_siz, opt.hist_len)
+valid_shaped = valid_states.reshape(valid_states.shape[0], opt.cub_siz*opt.pob_siz, opt.cub_siz*opt.pob_siz, opt.hist_len)
 
 #train_shaped = tf.reshape(train_states, [-1,25, 25, 4])
 train_shaped = train_shaped.astype('float32')
 valid_shaped = valid_shaped.astype('float32')
 num_classes = 5
 
-input_shape = (25,25,opt.hist_len)
+input_shape = (opt.cub_siz*opt.pob_siz,opt.cub_siz*opt.pob_siz,opt.hist_len)
 
 print(train_shaped.shape)
 

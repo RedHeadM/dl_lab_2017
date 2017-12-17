@@ -15,8 +15,7 @@ class TransitionTable:
         self.states_fil = states_fil
         self.labels_fil = labels_fil
         self.minibatchInd = None
-        if self.states_fil is not None and self.labels_fil is not None:
-            self.load_data()
+        self.load_data()
         self.recent_states = np.zeros([self.hist_len, self.state_siz])
 
     def __del__(self):

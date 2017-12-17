@@ -12,17 +12,20 @@ import time
 from transitionTable import TransitionTable
 model = load_model('my_model.h5')
 
+import random
+
 
 # 0. initialization
 opt = Options()
 sim = Simulator(opt.map_ind, opt.cub_siz, opt.pob_siz, opt.act_num)
+print(opt.state_siz)
 trans = TransitionTable(opt.state_siz, opt.act_num, opt.hist_len,
                              opt.minibatch_size, opt.valid_size,
-                             None, None)
-
-state_history = np.zeros((1,25,25,opt.hist_len))
+                             opt.states_fil, opt.labels_fil)
+state_length = (opt.cub_siz*opt.pob_siz)
+state_history = np.zeros((1,state_length,state_length,opt.hist_len))
 # TODO: load your agent
-# Hint: If using standard tensorflow api it helps to write your own model.py
+# Hint: If using standard tensorflow api it helps to write your own model.py  
 # file with the network configuration, including a function model.load().
 # You can use saver = tf.train.Saver() and saver.restore(sess, filename_cpkt)
 
@@ -53,31 +56,33 @@ for step in range(opt.eval_steps):
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # TODO: here you would let your agent take its action
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # Hint: get the image using rgb2gray(state.pob), append latest image to a history
+        # Hint: get the image using rgb2gray(state.pob), append latest image to a history 
         # this just gets a random action
-
+        
         #model.predict()
+
         gray_state = rgb2gray(state.pob)
-        print(gray_state.shape)
-        gray_state = gray_state.reshape(1,625)
+        gray_state = gray_state.reshape(1,opt.state_siz)
         trans.add_recent(step, gray_state)
         recent = trans.get_recent()
 
-        recent_shaped = recent.reshape(1,25,25,opt.hist_len)
-        print(recent_shaped.shape)
+        recent_shaped = recent.reshape(1,state_length,state_length,opt.hist_len)
+        #print(recent_shaped.shape)
         #print(gray_state)
         #print(gray_state.shape)
-        #action = randrange(opt.act_num)
+
 
         #state_history = np.roll(state_history, axis=3, shift=1)
         #state_history[0,:,:,0] = gray_state
         #action = model.predict(state_history)
-        action = model.predict(recent_shaped)
-        print(action)
-        print(np.argmax(action))
-        state = sim.step(np.argmax(action))
+        action = np.argmax(model.predict(recent_shaped))
 
-
+        #action = randrange(opt.act_num)
+        #print(action)
+        #print(np.argmax(action))
+        state = sim.step(action)
+        
+        
 
         #plt.subplot(131)
         #win_all = plt.imshow(state_history[0,:,:,2])
@@ -87,8 +92,8 @@ for step in range(opt.eval_steps):
         #plt.draw()
 
 
-
-
+        
+        
         epi_step += 1
 
     if state.terminal or epi_step >= opt.early_stop:
@@ -115,5 +120,5 @@ for step in range(opt.eval_steps):
         plt.draw()
 
 # 2. calculate statistics
-print(float(nepisodes_solved) / float(nepisodes))
+print("this session was: {}".format(float(nepisodes_solved) / float(nepisodes)))
 # 3. TODO perhaps  do some additional analysis
