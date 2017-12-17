@@ -22,91 +22,75 @@ from keras import optimizers
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 # 0. initialization
-opt = Options()
-sim = Simulator(opt.map_ind, opt.cub_siz, opt.pob_siz, opt.act_num)
-trans = TransitionTable(opt.state_siz, opt.act_num, opt.hist_len,
-                             opt.minibatch_size, opt.valid_size,
-                             opt.states_fil, opt.labels_fil)
+def train_model (opt = Options(), save_mdl_name='my_model.h5', epochs = 10):
+    sim = Simulator(opt.map_ind, opt.cub_siz, opt.pob_siz, opt.act_num)
+    trans = TransitionTable(opt.state_siz, opt.act_num, opt.hist_len,
+                                 opt.minibatch_size, opt.valid_size,
+                                 opt.states_fil, opt.labels_fil)
 
-# 1. train
-######################################
-# TODO implement your training here!
-# you can get the full data from the transition table like this:
-#
-# # both train_data and valid_data contain tupes of images and labels
-# train_data = trans.get_train()
-# valid_data = trans.get_valid()
-#
-# alternatively you can get one random mini batch line this
-#
-# for i in range(number_of_batches):
-#     x, y = trans.sample_minibatch()
-# Hint: to ease loading your model later create a model.py file
-# where you define your network configuration
-######################################
+    # 1. train
+    [train_states, train_labels] = trans.get_train()
+    [valid_states, valid_labels] = trans.get_valid()
+    print("train data shape {}",train_states.shape)
+    print("train data shape {}",train_labels.shape)
 
-[train_states, train_labels] = trans.get_train()
-[valid_states, valid_labels] = trans.get_valid()
-print("train data shape {}",train_states.shape)
-print("train data shape {}",train_labels.shape)
+    print("valid data shape {}",valid_states.shape)
+    print("valid data shape {}",valid_labels.shape)
 
-print("valid data shape {}",valid_states.shape)
-print("valid data shape {}",valid_labels.shape)
+    train_shaped = train_states.reshape(train_states.shape[0], opt.cub_siz*opt.pob_siz, opt.cub_siz*opt.pob_siz, opt.hist_len)
+    valid_shaped = valid_states.reshape(valid_states.shape[0], opt.cub_siz*opt.pob_siz, opt.cub_siz*opt.pob_siz, opt.hist_len)
 
-train_shaped = train_states.reshape(train_states.shape[0], opt.cub_siz*opt.pob_siz, opt.cub_siz*opt.pob_siz, opt.hist_len)
-valid_shaped = valid_states.reshape(valid_states.shape[0], opt.cub_siz*opt.pob_siz, opt.cub_siz*opt.pob_siz, opt.hist_len)
+    #train_shaped = tf.reshape(train_states, [-1,25, 25, 4])
+    train_shaped = train_shaped.astype('float32')
+    valid_shaped = valid_shaped.astype('float32')
+    num_classes = 5
 
-#train_shaped = tf.reshape(train_states, [-1,25, 25, 4])
-train_shaped = train_shaped.astype('float32')
-valid_shaped = valid_shaped.astype('float32')
-num_classes = 5
+    input_shape = (opt.cub_siz*opt.pob_siz,opt.cub_siz*opt.pob_siz,opt.hist_len)
 
-input_shape = (opt.cub_siz*opt.pob_siz,opt.cub_siz*opt.pob_siz,opt.hist_len)
+    # print(train_shaped.shape)
 
-print(train_shaped.shape)
+    class AccuracyHistory(keras.callbacks.Callback):
+        def on_train_begin(self, logs={}):
+            self.acc = []
 
-class AccuracyHistory(keras.callbacks.Callback):
-    def on_train_begin(self, logs={}):
-        self.acc = []
+        def on_epoch_end(self, batch, logs={}):
+            self.acc.append(logs.get('acc'))
 
-    def on_epoch_end(self, batch, logs={}):
-        self.acc.append(logs.get('acc'))
+    history = AccuracyHistory()
 
-history = AccuracyHistory()
+    model = Sequential()
+    model.add(Conv2D(32, kernel_size=(3, 3), strides=(2, 2),
+                     activation='relu',
+                     input_shape=input_shape))
+    #model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
+    model.add(Conv2D(128, (3, 3), activation='relu'))
+    model.add(Conv2D(128, (3, 3), activation='relu'))
+    #model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Flatten())
+    model.add(Dense(1000, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(num_classes, activation='softmax'))
 
+    #keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    #model.compile(loss=keras.losses.categorical_crossentropy,
+    #              optimizer=keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0),
+    #              metrics=['accuracy'])
+    model.compile(loss=keras.losses.categorical_crossentropy,
+                  optimizer=keras.optimizers.SGD(lr=0.001),
+                  metrics=['accuracy'])
 
-model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3), strides=(2, 2),
-                 activation='relu',
-                 input_shape=input_shape))
-#model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(Conv2D(128, (3, 3), activation='relu'))
-model.add(Conv2D(128, (3, 3), activation='relu'))
-#model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Flatten())
-model.add(Dense(1000, activation='relu'))
-model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation='softmax'))
-
-#keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-#model.compile(loss=keras.losses.categorical_crossentropy,
-#              optimizer=keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0),
-#              metrics=['accuracy'])
-model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.SGD(lr=0.001),
-              metrics=['accuracy'])
-epochs = 10
-
-model.fit(train_shaped, train_labels,
-          batch_size=trans.minibatch_size,
-          epochs=epochs,
-          verbose=1,
-          validation_data=(valid_shaped, valid_labels),
-          callbacks=[history])
+    model.fit(train_shaped, train_labels,
+              batch_size=trans.minibatch_size,
+              epochs=epochs,
+              verbose=1,
+              validation_data=(valid_shaped, valid_labels),
+              callbacks=[history])
 
 
+    # 2. save your trained model
+    model.save(save_mdl_name)
 
 
-# 2. save your trained model
-model.save('my_model.h5')
+if __name__ == "__main__":
+    train_model()
