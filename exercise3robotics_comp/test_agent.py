@@ -74,41 +74,13 @@ for step in range(opt.eval_steps):
         recent = trans.get_recent()
 
         recent_shaped = recent.reshape(1,state_length,state_length,opt.hist_len)
-        #print(recent_shaped.shape)
-        #print(gray_state)
-        #print(gray_state.shape)
-
-
-        #state_history = np.roll(state_history, axis=3, shift=1)
-        #state_history[0,:,:,0] = gray_state
-        #action = model.predict(state_history)
+ 
         action = np.argmax(model.predict(recent_shaped))
 
-        #action = randrange(opt.act_num)
-        #print(action)
-        #print(np.argmax(action))
         state = sim.step(action)
 
 
-
-        #plt.subplot(131)
-        #win_all = plt.imshow(state_history[0,:,:,2])
-        #plt.subplot(132)
-        #win_all = plt.imshow(state_history[0,:,:,3])
-        #plt.pause(opt.disp_interval)
-        #plt.draw()
-
-
-
         epi_step += 1
-
-    # if state.terminal or epi_step >= opt.early_stop:
-    #     epi_step = 0
-    #     nepisodes += 1
-    #     if state.terminal:
-    #         nepisodes_solved += 1
-    #     # start a new game
-    #     state = sim.newGame(opt.tgt_y, opt.tgt_x)
 
     if step % opt.prog_freq == 0:
         print("step {}".format(step))
