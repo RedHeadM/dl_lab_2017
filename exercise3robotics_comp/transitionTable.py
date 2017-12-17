@@ -19,7 +19,8 @@ class TransitionTable:
         self.recent_states = np.zeros([self.hist_len, self.state_siz])
 
     def __del__(self):
-        print("Garbage collected.")
+        #print("Garbage collected.")
+        pass
 
     # helper funcs
 
