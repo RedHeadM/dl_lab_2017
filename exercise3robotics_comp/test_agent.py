@@ -54,19 +54,18 @@ action = 0     # action to take given by the network
 state = sim.newGame(opt.tgt_y, opt.tgt_x)
 astar_num_steps = get_astar_steps(copy.deepcopy(sim))
 
-astar_num_steps_arr = []
-agent_num_steps_arr = []
+astar_num_steps_arr = np.array([])
+agent_num_steps_arr = np.empty(opt.eval_steps)
 
-# for step in range(opt.eval_steps):
-for step in range(10):
+for step in range(opt.eval_steps):
 
     # check if episode ended
     if state.terminal or epi_step >= opt.early_stop:
         if state.terminal:
             nepisodes_solved += 1
         print("astar_num_steps: {} agent steps: {} ".format(astar_num_steps,epi_step))
-        astar_num_steps_arr.append(astar_num_steps)
-        agent_num_steps_arr.append(epi_step)
+        np.append(astar_num_steps_arr,astar_num_steps)
+        agent_num_steps_arr[nepisodes]=epi_step
         nepisodes += 1
         # start a new game
         state = sim.newGame(opt.tgt_y, opt.tgt_x)
@@ -103,5 +102,5 @@ for step in range(10):
 # 2. calculate statistics
 print("this session was: {}".format(float(nepisodes_solved) / float(nepisodes)))
 # 3. additional analysis
-astar_diff = mean(np.arry(epi_step-astar_num_steps))
+astar_diff = np.mean(np.array(agent_num_steps_arr-astar_num_steps_arr))
 print("avg diff to astar: {}".format(astar_diff))

@@ -41,7 +41,7 @@ class Options:
     eval_nepisodes  = 10
 
     data_steps  = n_minibatches * minibatch_size + valid_size
-    eval_steps  = early_stop * eval_nepisodes
+    eval_steps  = 50#early_stop * eval_nepisodes
     eval_freq   = n_minibatches # evaluate after each epoch
     prog_freq   = 500
 
