@@ -33,7 +33,8 @@ class Simulator:
         self.reset_map(self.map_ind)
 
     def __del__(self):
-        print("Garbage collected.")
+        # print("Garbage collected.")
+        pass
 
     # reset funcs
 

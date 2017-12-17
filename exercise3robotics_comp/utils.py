@@ -38,10 +38,11 @@ class Options:
     minibatch_size  = 32
     n_minibatches   = 500
     valid_size      = 500
-    eval_nepisodes  = 10
+    eval_nepisodes  = 50
 
     data_steps  = n_minibatches * minibatch_size + valid_size
     eval_steps  = early_stop * eval_nepisodes
+    assert eval_steps > early_stop
     eval_freq   = n_minibatches # evaluate after each epoch
     prog_freq   = 500
 

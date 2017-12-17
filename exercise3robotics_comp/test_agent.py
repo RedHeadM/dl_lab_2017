@@ -102,7 +102,8 @@ def test_model(opt = Options(),mdl_load_name='my_model.h5'):
 
     agent_num_steps_arr=np.array(agent_num_steps_arr)
     astar_num_steps_arr=np.array(astar_num_steps_arr)
-
+    print("agent_num_steps_arr: {}".format(agent_num_steps_arr))
+    print("astar_num_steps_arr: {}".format(astar_num_steps_arr))
     astar_diff = np.mean(agent_num_steps_arr-astar_num_steps_arr)
     print("avg diff to astar: {}".format(astar_diff))
     return [success_rate, astar_diff]
