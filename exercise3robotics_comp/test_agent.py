@@ -59,7 +59,7 @@ def test_model(opt = Options(),mdl_load_name='my_model.h5'):
         if state.terminal or epi_step >= opt.early_stop:
             if state.terminal:
                 nepisodes_solved += 1
-            # print("astar_num_steps: {} agent steps: {} ".format(astar_num_steps,epi_step))
+            print("astar_num_steps: {} agent steps: {} ".format(astar_num_steps,epi_step))
             astar_num_steps_arr.append(astar_num_steps)
             agent_num_steps_arr.append(epi_step)
             nepisodes += 1

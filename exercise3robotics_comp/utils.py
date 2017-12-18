@@ -2,8 +2,8 @@ import numpy as np
 
 class Options:
     #
-    disp_on = False # you might want to set it to False for speed
-    map_ind = 1
+    disp_on = True # you might want to set it to False for speed
+    map_ind = 0
     change_tgt = False #rand goal pos if true
     states_fil = "states.csv"
     labels_fil = "labels.csv"
@@ -33,7 +33,7 @@ class Options:
     act_num = 5
     # [3,5,7,11,13]
     # traing hyper params
-    hist_len = 3
+    hist_len = 4
     minibatch_size  = 32
     n_minibatches   = 500
     valid_size      = 500
