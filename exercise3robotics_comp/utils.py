@@ -12,7 +12,7 @@ class Options:
     # simulator config
     disp_interval = .005
     cub_siz = 5
-    pob_siz = 5     # for partial observation
+    pob_siz = 5     # for partial observation, must be not even
     # run get_data if cub_siz or pob_siz is changed
     if map_ind == 0:
 
