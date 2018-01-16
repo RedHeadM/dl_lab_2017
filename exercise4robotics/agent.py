@@ -14,7 +14,7 @@ class DQNAgent:
         self.action_size = action_size
         self.memory = deque(maxlen=2000)
         self.gamma = 0.95    # discount rate
-        self.epsilon = 50.0  # exploration rate
+        self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
         self.learning_rate = 0.001
@@ -35,6 +35,8 @@ class DQNAgent:
         model.add(Dense(self.action_size, activation='linear'))
         model.compile(loss=self._huber_loss,
                       optimizer=Adam(lr=self.learning_rate))
+        # model.compile(loss='mse',
+        #               optimizer=Adam(lr=self.learning_rate))
         return model
 
     def update_target_model(self):
@@ -48,6 +50,10 @@ class DQNAgent:
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
         act_values = self.model.predict(state)
+        # print("act vals shapes: {}".format(act_values.shape))
+        # print("act vals {}".format(act_values))
+        # print("act vals mean {}".format(np.mean(act_values)))
+        # print("act take index {}".format(np.argmax(act_values[0])))
         return np.argmax(act_values[0])  # returns action
 
     def replay(self, batch_size):
