@@ -65,7 +65,7 @@ steps = 1 * 10**6
 epi_step = 0
 nepisodes = 0
 episode_reward = 0 #sum of a all rewards in one episode
-disp_progress_n = 50 # show a full episode every n episodes
+disp_progress_n = 20 # show a full episode every n episodes
 
 state = sim.newGame(opt.tgt_y, opt.tgt_x)
 state_with_history = np.zeros((opt.hist_len, opt.state_siz))
@@ -77,14 +77,14 @@ for step in range(steps):
 
         disp_progress = True if nepisodes % disp_progress_n == 0 else False
 
-        # if state.terminal:
-        #     print("nepisodes_solved")
-
-        print("step: {}/{}, episode_reward: {:.2}, e: {:.2}"
-                      .format(step, steps, episode_reward, agent.epsilon))
+        if state.terminal:
+            print("nepisodes_solved")
+        nepisodes += 1
+        print("step: {}/{}, played {} episodes, episode_reward: {:.2}, e: {:.2}"
+                      .format(step, steps,nepisodes, episode_reward, agent.epsilon))
         epi_step = 0
         episode_reward = 0
-        nepisodes += 1
+
         # reset the game
         state = sim.newGame(opt.tgt_y, opt.tgt_x)
 
@@ -99,7 +99,7 @@ for step in range(steps):
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # this just gets a random action
     # action = randrange(opt.act_num)#TODO
-    action = agent.act(np.array([state_with_history.reshape(-1)]))
+    action = agent.act(np.array([next_state_with_history.reshape(-1)]))
     epi_step +=1
 
     action_onehot = trans.one_hot_action(action)
@@ -108,10 +108,11 @@ for step in range(steps):
     append_to_hist(next_state_with_history, rgb2gray(next_state.pob).reshape(opt.state_siz))
     # add to the transition table
     trans.add(state_with_history.reshape(-1), action_onehot, next_state_with_history.reshape(-1), next_state.reward, next_state.terminal)
+    agent.remember(np.array([state_with_history.reshape(-1)]), action, next_state.reward,np.array([next_state_with_history.reshape(-1)]), next_state.terminal)
     # mark next state as current state
     state_with_history = np.copy(next_state_with_history)
     episode_reward += next_state.reward
-    agent.remember(np.array([state_with_history.reshape(-1)]), action, next_state.reward,np.array([next_state_with_history.reshape(-1)]), next_state.terminal)
+
     state = next_state
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # TODO: here you would train your agent
