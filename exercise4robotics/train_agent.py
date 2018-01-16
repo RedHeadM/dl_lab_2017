@@ -52,7 +52,7 @@ print("opt.act_num shape {}".format(opt.act_num))
 agent = DQNAgent(state_shape, opt.act_num)
 # agent.load("./save/cartpole-dqn.h5")
 # batch_size = 4
-batch_size = 32
+batch_size = 50#32
 agent.model.summary()
 for layer in agent.model.layers:
     print(layer.get_output_at(0).get_shape().as_list())
@@ -77,6 +77,10 @@ for step in range(steps):
 
         disp_progress = True if nepisodes % disp_progress_n == 0 else False
 
+
+        if nepisodes % 10 == 0:
+            print("saved")
+            agent.save("save/network.h5")
         if state.terminal:
             print("nepisodes_solved:")
         nepisodes += 1
@@ -134,6 +138,7 @@ for step in range(steps):
             win_pob.set_data(state.pob)
         plt.pause(opt.disp_interval)
         plt.draw()
+
 
 
 # 2. perform a final test of your model and save it
