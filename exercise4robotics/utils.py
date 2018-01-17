@@ -2,7 +2,7 @@ import numpy as np
 
 class Options:
     #
-    disp_on = False # you might want to set it to False for speed
+    disp_on = True # you might want to set it to False for speed
     map_ind = 1
     change_tgt = False
     states_fil = "states.csv"
@@ -33,7 +33,7 @@ class Options:
 
     # traing hyper params
     hist_len = 1
-    minibatch_size  = 32
+    minibatch_size  = 50#32
     eval_nepisodes  = 10
 
 class State: # return tuples made easy

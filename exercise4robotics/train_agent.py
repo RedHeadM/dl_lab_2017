@@ -65,8 +65,8 @@ steps = 1 * 10**6
 epi_step = 0
 nepisodes = 0
 episode_reward = 0 #sum of a all rewards in one episode
-disp_progress_n = 1 # show a full episode every n episodes
-FULL_RANDOM_STEPS = 10000
+disp_progress_n = 5 # show a full episode every n episodes
+FULL_RANDOM_STEPS = 5000
 
 state = sim.newGame(opt.tgt_y, opt.tgt_x)
 state_with_history = np.zeros((opt.hist_len, opt.state_siz))
@@ -109,7 +109,7 @@ for step in range(steps):
         action = randrange(opt.act_num)#TODO
     else:
         action = agent.act(np.array([state_with_history.reshape(-1)]))
-        print(action)
+        #print(action)
     # action = agent.act(np.array([state_with_history.reshape(-1)]))
 
     # print(np.mean(state_with_history.reshape(-1)))#check if state is changing
@@ -127,7 +127,7 @@ for step in range(steps):
     state = next_state
 
     # TODO every once in a while you should test your agent here so that you can track its performance
-    if len(agent.memory) > batch_size:
+    if len(agent.memory) > batch_size and step > FULL_RANDOM_STEPS:
          e_change =True if FULL_RANDOM_STEPS >step else False
          agent.replay(batch_size, e_change)
 
