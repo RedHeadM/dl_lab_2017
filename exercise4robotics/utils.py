@@ -2,7 +2,7 @@ import numpy as np
 
 class Options:
     #
-    disp_on = True # you might want to set it to False for speed
+    disp_on = False # you might want to set it to False for speed
     map_ind = 1
     change_tgt = False
     states_fil = "states.csv"

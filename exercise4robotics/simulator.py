@@ -101,7 +101,7 @@ class Simulator:
     def act(self):
         bot_pos_new = self.obj_pos[self.bot_ind, :] + self.act_pos_ind[self.state_action, :]
         if bot_pos_new[0] == self.obj_pos[self.tgt_ind][0] and bot_pos_new[1] == self.obj_pos[self.tgt_ind][1]: # reaching tgt
-            self.state_reward   = 1.
+            self.state_reward   = 500.
             self.state_terminal = True
             self.obj_pos[self.bot_ind, :] = bot_pos_new
         elif self.map[bot_pos_new[0]][bot_pos_new[1]] == 1: # collision
