@@ -32,7 +32,7 @@ class Options:
     act_num = 5
 
     # traing hyper params
-    hist_len = 6
+    hist_len = 3
     minibatch_size  = 32
     eval_nepisodes  = 10
 

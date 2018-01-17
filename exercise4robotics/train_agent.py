@@ -27,7 +27,7 @@ def append_to_hist(state, obs):
 opt = Options()
 sim = Simulator(opt.map_ind, opt.cub_siz, opt.pob_siz, opt.act_num)
 # setup a large transitiontable that is filled during training
-maxlen = 100000
+maxlen = 10
 trans = TransitionTable(opt.state_siz, opt.act_num, opt.hist_len,
                         opt.minibatch_size, maxlen)
 
@@ -49,7 +49,7 @@ input_shape_conv = (opt.cub_siz*opt.pob_siz,opt.cub_siz*opt.pob_siz,opt.hist_len
 
 use_conv =True
 agent = DQNAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
-# agent.load("./save/cartpole-dqn.h5")
+#agent.load("./save/network.h5")
 # batch_size = 4
 batch_size = 50#32
 agent.model.summary()
@@ -97,6 +97,7 @@ for step in range(steps):
         state_with_history[:] = 0
         append_to_hist(state_with_history, rgb2gray(state.pob).reshape(opt.state_siz))
         next_state_with_history = np.copy(state_with_history)
+ 
 
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # TODO: here you would let your agent take its action

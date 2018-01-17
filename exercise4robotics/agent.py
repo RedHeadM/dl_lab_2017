@@ -111,7 +111,7 @@ class DQNAgent:
             action = np.argmax(action) 
             target = self.model.predict(state)
             if done:
-                target[0][action] = reward
+                target[0][action] = reward 
             else:
                 a = self.model.predict(next_state)[0]
                 t = self.target_model.predict(next_state)[0]
