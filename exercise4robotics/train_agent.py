@@ -66,6 +66,7 @@ epi_step = 0
 nepisodes = 0
 episode_reward = 0 #sum of a all rewards in one episode
 disp_progress_n = 5 # show a full episode every n episodes
+FULL_RANDOM_STEPS = 1000
 
 state = sim.newGame(opt.tgt_y, opt.tgt_x)
 state_with_history = np.zeros((opt.hist_len, opt.state_siz))
@@ -73,12 +74,12 @@ append_to_hist(state_with_history, rgb2gray(state.pob).reshape(opt.state_siz))
 next_state_with_history = np.copy(state_with_history)
 disp_progress = False
 for step in range(steps):
-    if state.terminal or epi_step >= opt.early_stop or episode_reward < -10 :
+    if state.terminal or epi_step >= opt.early_stop or episode_reward < -5 :
 
         disp_progress = True if nepisodes % disp_progress_n == 0 else False
 
 
-        if nepisodes % 10 == 0:
+        if nepisodes % 10 == 0 and nepisodes != 0 :
             print("saved")
             agent.save("save/network.h5")
         if state.terminal:
@@ -88,7 +89,7 @@ for step in range(steps):
                       .format(step, steps,nepisodes, episode_reward, agent.epsilon))
         epi_step = 0
         episode_reward = 0
-
+        agent.update_target_model()
         # reset the game
         state = sim.newGame(opt.tgt_y, opt.tgt_x)
 
@@ -102,11 +103,11 @@ for step in range(steps):
     #       remember
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # this just gets a random action for training
-    # if not disp_progress:
-    #     action = randrange(opt.act_num)#TODO
-    # else:
-    #     action = agent.act(np.array([state_with_history.reshape(-1)]))
-    action = agent.act(np.array([state_with_history.reshape(-1)]))
+    if step <= FULL_RANDOM_STEPS:
+        action = randrange(opt.act_num)#TODO
+    else:
+        action = agent.act(np.array([state_with_history.reshape(-1)]))
+    # action = agent.act(np.array([state_with_history.reshape(-1)]))
 
     # print(np.mean(state_with_history.reshape(-1)))#check if state is changing
 
@@ -116,7 +117,7 @@ for step in range(steps):
     append_to_hist(next_state_with_history, rgb2gray(next_state.pob).reshape(opt.state_siz))
     # add to the transition table
     trans.add(state_with_history.reshape(-1), trans.one_hot_action(action), next_state_with_history.reshape(-1), next_state.reward, next_state.terminal)
-    agent.remember(np.array([state_with_history.reshape(-1)]), action, next_state.reward, np.array([next_state_with_history.reshape(-1)]), next_state.terminal)
+    # agent.remember(np.array([state_with_history.reshape(-1)]), action, next_state.reward, np.array([next_state_with_history.reshape(-1)]), next_state.terminal)
     # mark next state as current state
     state_with_history = np.copy(next_state_with_history)
     episode_reward += next_state.reward
@@ -124,7 +125,9 @@ for step in range(steps):
 
     # TODO every once in a while you should test your agent here so that you can track its performance
     if len(agent.memory) > batch_size:
-        agent.replay(batch_size)
+        e_change =True if FULL_RANDOM_STEPS >step else False
+        # agent.replay(batch_size, e_change)
+        agent.train(batch_size,trans.sample_minibatch())
 
     if opt.disp_on and disp_progress:
 
