@@ -65,7 +65,7 @@ steps = 1 * 10**6
 epi_step = 0
 nepisodes = 0
 episode_reward = 0 #sum of a all rewards in one episode
-disp_progress_n = 20 # show a full episode every n episodes
+disp_progress_n = 1 # show a full episode every n episodes
 FULL_RANDOM_STEPS = 10000
 
 state = sim.newGame(opt.tgt_y, opt.tgt_x)
@@ -80,7 +80,7 @@ for step in range(steps):
         disp_progress = True if nepisodes % disp_progress_n == 0 else False
 
 
-        if nepisodes % 100 == 0 and nepisodes != 0 :
+        if nepisodes % 50 == 0 and nepisodes != 0 :
             print("saved")
             agent.save("save/network.h5")
         if state.terminal:
@@ -93,7 +93,7 @@ for step in range(steps):
         agent.update_target_model()
         # reset the game
         #state = sim.newGame(opt.tgt_y, opt.tgt_x)#random agent pos
-        state = sim.newGame(opt.tgt_y, opt.tgt_x, agent_fre_pos =[0,0])#random agent pos
+        state = sim.newGame(opt.tgt_y, opt.tgt_x, agent_fre_pos =0)#random agent pos
 
         # and reset the history
         state_with_history[:] = 0
