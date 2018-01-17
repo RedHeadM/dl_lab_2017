@@ -1,5 +1,4 @@
-import random
-import gym
+import random 
 import numpy as np
 from collections import deque
 from keras.models import Sequential

@@ -20,7 +20,7 @@ class Options:
         early_stop = 25#50
     elif map_ind == 1:
         cub_siz = 10
-        pob_siz = 3 # for partial observation
+        pob_siz = 9 # for partial observation
         # this defines the goal positionw
         tgt_y = 5
         tgt_x = 5
@@ -32,7 +32,7 @@ class Options:
     act_num = 5
 
     # traing hyper params
-    hist_len = 4
+    hist_len = 2
     minibatch_size  = 32
     eval_nepisodes  = 10
 

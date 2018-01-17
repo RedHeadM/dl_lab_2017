@@ -39,6 +39,15 @@ class Simulator:
 
     def reset_map(self, map_ind):
         self.map     = maps[self.map_ind]
+        #FIX: insert boarders for lager agent view sizes
+        for _ in range(self.pob_siz-1):
+            #one inital boarders line is given in the map file
+            self.map =  np.insert(self.map, 0, 1, axis = 1)#l
+            self.map =  np.insert(self.map, 0, 1, axis = 0)#top
+            self.map =  np.append(self.map, np.ones((1, self.map.shape[1])), axis = 0)#bot
+            self.map =  np.append(self.map, np.ones((self.map.shape[0],1)), axis = 1)#r
+        # print(self.map)
+        self.map=self.map.astype(int)
         self.map_hei = self.map.shape[0]
         self.map_wid = self.map.shape[1]
         self.bot_pos_old = np.array([self.map_hei, self.map_wid], int)
@@ -164,6 +173,9 @@ class Simulator:
             self.tgt_pos_old[1] = self.obj_pos[self.tgt_ind][1]
         # 1. assign tgt position
         if tgt_y != None and tgt_x != None:
+        #FIX for view size add boarder offsets
+            tgt_y+= self.pob_siz
+            tgt_x+= self.pob_siz
             self.obj_pos[self.tgt_ind][0] = tgt_y
             self.obj_pos[self.tgt_ind][1] = tgt_x
         else:
