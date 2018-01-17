@@ -14,7 +14,7 @@ class DQNAgent:
         self.action_size = action_size
         self.memory = deque(maxlen=2000)
         self.gamma = 0.95    # discount rate
-        self.epsilon = 50.0  # exploration rate
+        self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
         self.learning_rate = 0.1
@@ -71,10 +71,14 @@ class DQNAgent:
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
-    def train(self, batch_size, minibatch, change_epsilon = True):
-        # state_batch, action_batch, next_state_batch, reward_batch, terminal_batch =
-        for state, action, next_state, reward, done in minibatch:
-            # print(state.shape)
+    def train(self, minibatch, change_epsilon = True):
+        state_batch, action_batch, next_state_batch, reward_batch, terminal_batch = minibatch
+
+        for state, action, next_state, reward, done in zip(state_batch, action_batch, next_state_batch, reward_batch, terminal_batch):
+            state = np.array([state.reshape(-1)])
+            next_state = np.array([next_state.reshape(-1)])
+            # np.array([state_with_history.reshape(-1)])
+            action = np.argmax(action[0])
             target = self.model.predict(state)
             if done:
                 target[0][action] = reward
@@ -83,7 +87,7 @@ class DQNAgent:
                 t = self.target_model.predict(next_state)[0]
                 target[0][action] = reward + self.gamma * t[np.argmax(a)]
             self.model.fit(state, target, epochs=1, verbose=0)
-        if self.epsilon > self.epsilon_min:
+        if self.epsilon > self.epsilon_min and change_epsilon:
             self.epsilon *= self.epsilon_decay
 
     def load(self, name):
