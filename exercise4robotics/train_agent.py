@@ -44,12 +44,11 @@ if opt.disp_on:
 # You should prepare your network training here. I suggest to put this into a
 # class by itself but in general what you want to do is roughly the following
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-state_shape = int(opt.cub_siz*opt.pob_siz*opt.cub_siz*opt.pob_siz*opt.hist_len)
+input_shape_dense = int(opt.cub_siz*opt.pob_siz*opt.cub_siz*opt.pob_siz*opt.hist_len)
+input_shape_conv = (opt.cub_siz*opt.pob_siz,opt.cub_siz*opt.pob_siz,opt.hist_len)
 
-print("state shape {}".format(state_shape))
-print("opt.act_num shape {}".format(opt.act_num))
-
-agent = DQNAgent(state_shape, opt.act_num)
+use_conv =True
+agent = DQNAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
 # agent.load("./save/cartpole-dqn.h5")
 # batch_size = 4
 batch_size = 50#32
@@ -66,7 +65,7 @@ epi_step = 0
 nepisodes = 0
 episode_reward = 0 #sum of a all rewards in one episode
 disp_progress_n = 5 # show a full episode every n episodes
-FULL_RANDOM_STEPS = 5000
+FULL_RANDOM_STEPS = 10000
 
 state = sim.newGame(opt.tgt_y, opt.tgt_x)
 state_with_history = np.zeros((opt.hist_len, opt.state_siz))
@@ -108,7 +107,10 @@ for step in range(steps):
     if step <= FULL_RANDOM_STEPS:
         action = randrange(opt.act_num)#TODO
     else:
-        action = agent.act(np.array([state_with_history.reshape(-1)]))
+        if use_conv:
+            action = agent.act(np.array([state_with_history]))
+        else:
+            action = agent.act(np.array([state_with_history.reshape(-1)]))
         #print(action)
     # action = agent.act(np.array([state_with_history.reshape(-1)]))
 
@@ -119,20 +121,21 @@ for step in range(steps):
     # append to history
     append_to_hist(next_state_with_history, rgb2gray(next_state.pob).reshape(opt.state_siz))
     # add to the transition table
-    #trans.add(state_with_history.reshape(-1), trans.one_hot_action(action), next_state_with_history.reshape(-1), next_state.reward, next_state.terminal)
-    agent.remember(np.array([state_with_history.reshape(-1)]), action, next_state.reward, np.array([next_state_with_history.reshape(-1)]), next_state.terminal)
+    trans.add(state_with_history.reshape(-1), trans.one_hot_action(action), next_state_with_history.reshape(-1), next_state.reward, next_state.terminal)
+    
+    #agent.remember(np.array([state_with_history.reshape(-1)]), action, next_state.reward, np.array([next_state_with_history.reshape(-1)]), next_state.terminal)TODO with conv
     # mark next state as current state
     state_with_history = np.copy(next_state_with_history)
     episode_reward += next_state.reward
     state = next_state
 
     # TODO every once in a while you should test your agent here so that you can track its performance
-    if len(agent.memory) > batch_size and step > FULL_RANDOM_STEPS:
-         e_change =True if FULL_RANDOM_STEPS >step else False
-         agent.replay(batch_size, e_change)
+    #if len(agent.memory) > batch_size and step > FULL_RANDOM_STEPS:
+    #     e_change =True if FULL_RANDOM_STEPS >step else False
+    #     agent.replay(batch_size, e_change)
 
-    #if step > FULL_RANDOM_STEPS:
-    #    agent.train(trans.sample_minibatch())
+    if step > FULL_RANDOM_STEPS:
+        agent.train(trans.sample_minibatch())
 
     if opt.disp_on and disp_progress:
 

@@ -108,9 +108,9 @@ class Simulator:
             self.state_reward   = -1.
             self.state_terminal = False
         else:
-            #self.state_reward   = -0.04
-            #dist to goal 
-            self.state_reward =-0.01*(np.abs(self.obj_pos[self.bot_ind][0]-self.obj_pos[self.tgt_ind][0]) +np.abs(self.obj_pos[self.bot_ind][1]-self.obj_pos[self.tgt_ind][1])) 
+            self.state_reward   = -0.04
+            #dist to goal:
+            #self.state_reward =-0.01*(np.abs(self.obj_pos[self.bot_ind][0]-self.obj_pos[self.tgt_ind][0]) +np.abs(self.obj_pos[self.bot_ind][1]-self.obj_pos[self.tgt_ind][1])) 
             self.state_terminal = False
             self.obj_pos[self.bot_ind, :] = bot_pos_new
 

@@ -2,7 +2,7 @@ import numpy as np
 
 class Options:
     #
-    disp_on = True # you might want to set it to False for speed
+    disp_on = False # you might want to set it to False for speed
     map_ind = 1
     change_tgt = False
     states_fil = "states.csv"
@@ -10,7 +10,7 @@ class Options:
     network_fil = "network.json"
     weights_fil = "network.h5"
     # simulator config
-    disp_interval = .005
+    disp_interval = .001
     if map_ind == 0:
         cub_siz = 5
         pob_siz = 5 # for partial observation
@@ -20,7 +20,7 @@ class Options:
         early_stop = 25#50
     elif map_ind == 1:
         cub_siz = 10
-        pob_siz = 11 # for partial observation
+        pob_siz = 3 # for partial observation
         # this defines the goal positionw
         tgt_y = 5
         tgt_x = 5
@@ -32,8 +32,8 @@ class Options:
     act_num = 5
 
     # traing hyper params
-    hist_len = 1
-    minibatch_size  = 50#32
+    hist_len = 4
+    minibatch_size  = 32
     eval_nepisodes  = 10
 
 class State: # return tuples made easy
