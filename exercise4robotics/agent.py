@@ -16,7 +16,7 @@ class DQNAgent:
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
-        self.learning_rate = 0.1
+        self.learning_rate = 0.01
         self.model = self._build_model()
         self.target_model = self._build_model()
         self.update_target_model()
@@ -74,8 +74,10 @@ class DQNAgent:
         state_batch, action_batch, next_state_batch, reward_batch, terminal_batch = minibatch
 
         for state, action, next_state, reward, done in zip(state_batch, action_batch, next_state_batch, reward_batch, terminal_batch):
-            state = np.array([state.reshape(-1)])
-            next_state = np.array([next_state.reshape(-1)])
+            #state = np.array([state.reshape(-1)])
+            #next_state = np.array([next_state.reshape(-1)])
+            state = np.array([state])
+            next_state = np.array([next_state])
             # np.array([state_with_history.reshape(-1)])
             action = np.argmax(action[0])
             target = self.model.predict(state)

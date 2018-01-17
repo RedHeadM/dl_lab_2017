@@ -164,7 +164,7 @@ class Simulator:
 
     # interfacing funcs
 
-    def newGame(self, tgt_y, tgt_x):
+    def newGame(self, tgt_y, tgt_x, agent_fre_pos =None):
         # 0. setting up
         if self.obj_pos[self.bot_ind][0] != -1 and self.obj_pos[self.bot_ind][1] != -1:
             self.bot_pos_old[0] = self.obj_pos[self.bot_ind][0]
@@ -184,7 +184,10 @@ class Simulator:
             self.obj_pos[self.tgt_ind][0] = self.fre_pos[choose_tgt_ind][0]
             self.obj_pos[self.tgt_ind][1] = self.fre_pos[choose_tgt_ind][1]
         # 2. assign bot position
-        choose_bot_ind = randrange(self.fre_pos.shape[0])
+        if  agent_fre_pos is None:
+        	choose_bot_ind = randrange(self.fre_pos.shape[0])
+        else:
+            choose_bot_ind = agent_fre_pos
         self.obj_pos[self.bot_ind][0] = self.fre_pos[choose_bot_ind][0]
         self.obj_pos[self.bot_ind][1] = self.fre_pos[choose_bot_ind][1]
         # 3. wrap up
