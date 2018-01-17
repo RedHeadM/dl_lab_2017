@@ -55,7 +55,7 @@ class DQNAgent:
         model.add(Conv2D(64, (3, 3), activation='relu'))
         model.add(Flatten())
         model.add(Dense(32, activation='relu'))
-        model.add(Dense(self.action_size, activation='linear'))
+        model.add(Dense(self.action_size))
         model.compile(loss='mse',
                   optimizer=Adam(lr=self.learning_rate))
         return model
@@ -123,6 +123,7 @@ class DQNAgent:
 
     def load(self, name):
         self.model.load_weights(name)
+        self.update_target_model()
 
     def save(self, name):
         self.model.save_weights(name)

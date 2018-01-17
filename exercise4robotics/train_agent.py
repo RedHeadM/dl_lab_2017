@@ -53,8 +53,7 @@ agent = DQNAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
 # batch_size = 4
 batch_size = 50#32
 agent.model.summary()
-for layer in agent.model.layers:
-    print(layer.get_output_at(0).get_shape().as_list())
+agent.load('save/working_conv_network.h5')
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
