@@ -53,7 +53,7 @@ agent = DQNAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
 # batch_size = 4
 batch_size = 50#32
 agent.model.summary()
-agent.load('save/working_conv_network.h5')
+#agent.load('save/working_conv_network.h5')
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
@@ -73,7 +73,7 @@ next_state_with_history = np.copy(state_with_history)
 disp_progress = False
 
 for step in range(steps):
-    if state.terminal or epi_step >= opt.early_stop or episode_reward < -6 :
+    if state.terminal or epi_step >= opt.early_stop or episode_reward < -10 :
 
         disp_progress = True if nepisodes % disp_progress_n == 0 else False
 
@@ -110,6 +110,7 @@ for step in range(steps):
             action = agent.act(np.array([state_with_history]))
         else:
             action = agent.act(np.array([state_with_history.reshape(-1)]))
+    #agent.update_target_model()
         #print(action)
     # action = agent.act(np.array([state_with_history.reshape(-1)]))
 

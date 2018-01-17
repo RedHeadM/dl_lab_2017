@@ -17,10 +17,10 @@ class DQNAgent:
         self.action_size = action_size
         self.memory = deque(maxlen=2000)
         self.gamma = 0.95    # discount rate
-        self.epsilon = 100.0#1.0  # exploration rate
+        self.epsilon = 10.0#1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
-        self.learning_rate = 0.00005#1e6#0.0005
+        self.learning_rate = 1e6#0.00005#1e6#0.0005
         self._use_conv = use_conv
         if not use_conv:
             self.model = self._build_model()
@@ -53,8 +53,9 @@ class DQNAgent:
                      activation='relu',
                      input_shape=self.state_size))
         model.add(Conv2D(64, (3, 3), activation='relu'))
+        model.add(Conv2D(128, (3, 3), activation='relu'))
         model.add(Flatten())
-        model.add(Dense(32, activation='relu'))
+        model.add(Dense(10, activation='relu'))
         model.add(Dense(self.action_size))
         model.compile(loss='mse',
                   optimizer=Adam(lr=self.learning_rate))
