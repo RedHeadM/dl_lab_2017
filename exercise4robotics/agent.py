@@ -85,7 +85,9 @@ class DQNAgent:
                 a = self.model.predict(next_state)[0]
                 t = self.target_model.predict(next_state)[0]
                 target[0][action] = reward + self.gamma * t[np.argmax(a)]
-            self.model.fit(state, target, epochs=1, verbose=0)
+            history = self.model.fit(state, target, epochs=1, verbose=0)
+            #print(history.history.keys())
+            #print("loss",history.history['loss'])
         if self.epsilon > self.epsilon_min and change_epsilon:
             self.epsilon *= self.epsilon_decay
 
