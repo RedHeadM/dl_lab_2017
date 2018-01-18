@@ -1,6 +1,7 @@
-import random 
+import random
 from time import time
 import numpy as np
+import keras
 from collections import deque
 from keras.models import Sequential
 from keras.optimizers import Adam
@@ -20,7 +21,7 @@ class DQNAgent:
         self.epsilon = 10.0#1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
-        self.learning_rate = 1e6#0.00005#1e6#0.0005
+        self.learning_rate = 1e-5#0.00005#1e-6#0.0005
         self._use_conv = use_conv
         if not use_conv:
             self.model = self._build_model()
@@ -43,8 +44,8 @@ class DQNAgent:
         model.add(Dense(self.action_size, activation='linear'))
         #model.compile(loss=self._huber_loss,
         #              optimizer=Adam(lr=self.learning_rate))
-        model.compile(loss='mse',
-                       optimizer=Adam(lr=self.learning_rate))
+        # model.compile(loss='mse',
+        #                optimizer=Adam(lr=self.learning_rate))
         return model
 
     def _build_model_conv(self):
@@ -53,12 +54,14 @@ class DQNAgent:
                      activation='relu',
                      input_shape=self.state_size))
         model.add(Conv2D(64, (3, 3), activation='relu'))
-        model.add(Conv2D(128, (3, 3), activation='relu'))
+        model.add(Conv2D(64, (3, 3), activation='relu'))
         model.add(Flatten())
-        model.add(Dense(10, activation='relu'))
+        model.add(Dense(512, activation='relu'))
         model.add(Dense(self.action_size))
         model.compile(loss='mse',
                   optimizer=Adam(lr=self.learning_rate))
+        # model.compile(loss='mse',
+        #                optimizer=keras.optimizers.SGD(lr=0.001),)
         return model
 
     def update_target_model(self):
@@ -108,17 +111,17 @@ class DQNAgent:
                   state = np.array([state])
                   next_state = np.array([next_state])
             # np.array([state_with_history.reshape(-1)])
-            action = np.argmax(action) 
+            action = np.argmax(action)
             target = self.model.predict(state)
             if done:
-                target[0][action] = reward 
+                target[0][action] = reward
             else:
                 a = self.model.predict(next_state)[0]
                 t = self.target_model.predict(next_state)[0]
                 target[0][action] = reward + self.gamma * t[np.argmax(a)]
             history = self.model.fit(state, target, epochs=1, verbose=0)#, callbacks=[tensorboard])
-            #print(history.history.keys())
-            #print("loss",history.history['loss'])
+            # print(history.history.keys())
+            # print("loss",history.history['loss'])
         if self.epsilon > self.epsilon_min and change_epsilon:
             self.epsilon *= self.epsilon_decay
 

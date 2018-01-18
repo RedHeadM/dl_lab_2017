@@ -64,7 +64,7 @@ epi_step = 0
 nepisodes = 0
 episode_reward = 0 #sum of a all rewards in one episode
 disp_progress_n = 5 # show a full episode every n episodes
-FULL_RANDOM_STEPS = 10000
+FULL_RANDOM_STEPS = 1
 
 state = sim.newGame(opt.tgt_y, opt.tgt_x)
 state_with_history = np.zeros((opt.hist_len, opt.state_siz))
@@ -90,14 +90,14 @@ for step in range(steps):
         episode_reward = 0
         agent.update_target_model()
         # reset the game
-        #state = sim.newGame(opt.tgt_y, opt.tgt_x)#random agent pos
-        state = sim.newGame(opt.tgt_y, opt.tgt_x, agent_fre_pos =0)#random agent pos
+        state = sim.newGame(opt.tgt_y, opt.tgt_x)#random agent pos
+        # state = sim.newGame(opt.tgt_y, opt.tgt_x, agent_fre_pos =0)#random agent pos
 
         # and reset the history
         state_with_history[:] = 0
         append_to_hist(state_with_history, rgb2gray(state.pob).reshape(opt.state_siz))
         next_state_with_history = np.copy(state_with_history)
- 
+
 
     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # TODO: here you would let your agent take its action
@@ -123,7 +123,7 @@ for step in range(steps):
     append_to_hist(next_state_with_history, rgb2gray(next_state.pob).reshape(opt.state_siz))
     # add to the transition table
     trans.add(state_with_history.reshape(-1), trans.one_hot_action(action), next_state_with_history.reshape(-1), next_state.reward, next_state.terminal)
-    
+
     #agent.remember(np.array([state_with_history.reshape(-1)]), action, next_state.reward, np.array([next_state_with_history.reshape(-1)]), next_state.terminal)TODO with conv
     # mark next state as current state
     state_with_history = np.copy(next_state_with_history)

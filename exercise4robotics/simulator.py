@@ -40,7 +40,7 @@ class Simulator:
     def reset_map(self, map_ind):
         self.map     = maps[self.map_ind]
         #FIX: insert boarders for lager agent view sizes
-        
+
         for _ in range(int((self.pob_siz-1)*0.5)):
             #one inital boarders line is given in the map file
             self.map =  np.insert(self.map, 0, 1, axis = 1)#l
@@ -101,7 +101,7 @@ class Simulator:
     def act(self):
         bot_pos_new = self.obj_pos[self.bot_ind, :] + self.act_pos_ind[self.state_action, :]
         if bot_pos_new[0] == self.obj_pos[self.tgt_ind][0] and bot_pos_new[1] == self.obj_pos[self.tgt_ind][1]: # reaching tgt
-            self.state_reward   = 1#500.
+            self.state_reward   = 500.
             self.state_terminal = True
             self.obj_pos[self.bot_ind, :] = bot_pos_new
         elif self.map[bot_pos_new[0]][bot_pos_new[1]] == 1: # collision
@@ -110,7 +110,7 @@ class Simulator:
         else:
             self.state_reward   = -0.04
             #dist to goal:
-            #self.state_reward =-0.01*(np.abs(self.obj_pos[self.bot_ind][0]-self.obj_pos[self.tgt_ind][0]) +np.abs(self.obj_pos[self.bot_ind][1]-self.obj_pos[self.tgt_ind][1])) 
+            #self.state_reward =-0.01*(np.abs(self.obj_pos[self.bot_ind][0]-self.obj_pos[self.tgt_ind][0]) +np.abs(self.obj_pos[self.bot_ind][1]-self.obj_pos[self.tgt_ind][1]))
             self.state_terminal = False
             self.obj_pos[self.bot_ind, :] = bot_pos_new
 
@@ -120,7 +120,7 @@ class Simulator:
                      self.state_screen,
                      self.state_terminal,
                      self.state_pob)
-    
+
     # drawing funcs
 
     def draw_cube(self, y, x, clr_ind, clr_val): # draw on channel clr_ind with clr_val
