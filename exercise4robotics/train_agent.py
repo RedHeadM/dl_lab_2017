@@ -36,6 +36,13 @@ def helper_save(plt_file_name):
 
 
 
+
+N_EPISODES_TOTAL_TRAIN = 700 #number of total trainign game episodes
+SAVE_AFTER_N_EPISODES = 50
+DISP_PROGRESS_AFTER_N_EPISODES = 5 # show a full episode every n episodes for opt.disp_on is true
+FULL_RANDOM_EPISODES = 5#two full random episodes before training
+
+
 # 0. initialization
 opt = Options()
 sim = Simulator(opt.map_ind, opt.cub_siz, opt.pob_siz, opt.act_num)
@@ -53,53 +60,46 @@ if opt.disp_on:
 
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# NOTE:
+
 # You should prepare your network training here. I suggest to put this into a
-# class by itself but in general what you want to do is roughly the following
-#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 input_shape_dense = int(opt.cub_siz*opt.pob_siz*opt.cub_siz*opt.pob_siz*opt.hist_len)
 input_shape_conv = (opt.cub_siz*opt.pob_siz,opt.cub_siz*opt.pob_siz,opt.hist_len)
 
 use_conv =True
 agent = DQNAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
-
-agent.model.summary()
+agent.model.summary()#print mdl
 # agent.load('save/network_conc_650_episodes.h5')
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-# lets assume we will train for a total of 1 million steps
-# this is just an example and you might want to change it
-nepisodes_total = 700
+#Param for training loop
+episode_reward_hist = []# history of total episode rewards
+epi_step_hist = [] #history of total episode step needed to solve or ealy step
 epi_step = 0
 nepisodes = 0
 episode_reward = 0 #sum of a all rewards in one episode
-episode_reward_hist = []# history of total episode rewards
-epi_step_hist = [] #history of total episode step needed to solve or ealy step
-disp_progress_n = 5 # show a full episode every n episodes
-FULL_RANDOM_EPISODES = 5#two full random episodes before training
-
+disp_progress = False
 state = sim.newGame(opt.tgt_y, opt.tgt_x)
 state_with_history = np.zeros((opt.hist_len, opt.state_siz))
 append_to_hist(state_with_history, rgb2gray(state.pob).reshape(opt.state_siz))
 next_state_with_history = np.copy(state_with_history)
-disp_progress = False
 
-while nepisodes < nepisodes_total:
+
+while nepisodes < N_EPISODES_TOTAL_TRAIN:
     if state.terminal or epi_step >= opt.early_stop or episode_reward < -10 :
 
-        disp_progress = True if nepisodes % disp_progress_n == 0 else False
+        disp_progress = True if nepisodes % DISP_PROGRESS_AFTER_N_EPISODES == 0 else False
+        nepisodes += 1
 
-
-        if nepisodes % 50 == 0 and nepisodes != 0 :
+        if nepisodes % SAVE_AFTER_N_EPISODES == 0 and nepisodes != 0 :
             print("saved")
-            agent.save("save/network.h5")
+            agent.save("save/" + opt.weights_fil)
 
         if state.terminal:
             print("nepisodes_solved:")
-        nepisodes += 1
+
         print("played {}/{} episodes, episode_reward: {:.2}, epi_step {}, e: {:.2}"
-                      .format(nepisodes,nepisodes_total, episode_reward,epi_step, agent.epsilon))
+                      .format(nepisodes,N_EPISODES_TOTAL_TRAIN, episode_reward,epi_step, agent.epsilon))
 
         epi_step_hist.append(epi_step)
         episode_reward_hist.append(episode_reward)
@@ -114,7 +114,6 @@ while nepisodes < nepisodes_total:
         state_with_history[:] = 0
         append_to_hist(state_with_history, rgb2gray(state.pob).reshape(opt.state_siz))
         next_state_with_history = np.copy(state_with_history)
-
 
     if nepisodes <= FULL_RANDOM_EPISODES:
         action = randrange(opt.act_num)#TODO
@@ -152,7 +151,7 @@ while nepisodes < nepisodes_total:
         plt.pause(opt.disp_interval)
         plt.draw()
 
-#plts of training
+#plts rewards and step per episode
 
 f, axarr = plt.subplots(2,1)
 
