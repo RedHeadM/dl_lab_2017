@@ -23,6 +23,19 @@ def append_to_hist(state, obs):
         state[i, :] = state[i+1, :]
     state[-1, :] = obs
 
+
+def helper_save(plt_file_name):
+    if plt_file_name is None:
+        plt.show()
+    else:
+        plt.tight_layout()
+        plt.savefig(plt_file_name+'.pdf', format='pdf', dpi=1000)
+        from matplotlib2tikz import save as tikz_save
+        # tikz_save('../report/ex1/plots/test.tex', figureheight='4cm', figurewidth='6cm')
+        tikz_save(plt_file_name + ".tikz", figurewidth="\\matplotlibTotikzfigurewidth", figureheight="\\matplotlibTotikzfigureheight",strict=False)
+
+
+
 # 0. initialization
 opt = Options()
 sim = Simulator(opt.map_ind, opt.cub_siz, opt.pob_siz, opt.act_num)
@@ -49,22 +62,22 @@ input_shape_conv = (opt.cub_siz*opt.pob_siz,opt.cub_siz*opt.pob_siz,opt.hist_len
 
 use_conv =True
 agent = DQNAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
-#agent.load("./save/network.h5")
-# batch_size = 4
-batch_size = 50#32
+
 agent.model.summary()
-#agent.load('save/working_conv_network.h5')
+# agent.load('save/network_conc_650_episodes.h5')
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 # lets assume we will train for a total of 1 million steps
 # this is just an example and you might want to change it
-steps = 1 * 10**6
+nepisodes_total = 700
 epi_step = 0
 nepisodes = 0
 episode_reward = 0 #sum of a all rewards in one episode
+episode_reward_hist = []# history of total episode rewards
+epi_step_hist = [] #history of total episode step needed to solve or ealy step
 disp_progress_n = 5 # show a full episode every n episodes
-FULL_RANDOM_STEPS = 1
+FULL_RANDOM_EPISODES = 5#two full random episodes before training
 
 state = sim.newGame(opt.tgt_y, opt.tgt_x)
 state_with_history = np.zeros((opt.hist_len, opt.state_siz))
@@ -72,7 +85,7 @@ append_to_hist(state_with_history, rgb2gray(state.pob).reshape(opt.state_siz))
 next_state_with_history = np.copy(state_with_history)
 disp_progress = False
 
-for step in range(steps):
+while nepisodes < nepisodes_total:
     if state.terminal or epi_step >= opt.early_stop or episode_reward < -10 :
 
         disp_progress = True if nepisodes % disp_progress_n == 0 else False
@@ -81,17 +94,21 @@ for step in range(steps):
         if nepisodes % 50 == 0 and nepisodes != 0 :
             print("saved")
             agent.save("save/network.h5")
+
         if state.terminal:
             print("nepisodes_solved:")
         nepisodes += 1
-        print("step: {}/{}, played {} episodes, episode_reward: {:.2}, epi_step {}, e: {:.2}"
-                      .format(step, steps,nepisodes, episode_reward,epi_step, agent.epsilon))
-        epi_step = 0
+        print("played {}/{} episodes, episode_reward: {:.2}, epi_step {}, e: {:.2}"
+                      .format(nepisodes,nepisodes_total, episode_reward,epi_step, agent.epsilon))
+
+        epi_step_hist.append(epi_step)
+        episode_reward_hist.append(episode_reward)
         episode_reward = 0
+        epi_step = 0
         agent.update_target_model()
         # reset the game
         state = sim.newGame(opt.tgt_y, opt.tgt_x)#random agent pos
-        # state = sim.newGame(opt.tgt_y, opt.tgt_x, agent_fre_pos =0)#random agent pos
+        # state = sim.newGame(opt.tgt_y, opt.tgt_x, agent_fre_pos =0)#agent fixed start pos
 
         # and reset the history
         state_with_history[:] = 0
@@ -99,23 +116,13 @@ for step in range(steps):
         next_state_with_history = np.copy(state_with_history)
 
 
-    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # TODO: here you would let your agent take its action
-    #       remember
-    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # this just gets a random action for training
-    if step <= FULL_RANDOM_STEPS:
+    if nepisodes <= FULL_RANDOM_EPISODES:
         action = randrange(opt.act_num)#TODO
     else:
         if use_conv:
             action = agent.act(np.array([state_with_history]))
         else:
             action = agent.act(np.array([state_with_history.reshape(-1)]))
-    #agent.update_target_model()
-        #print(action)
-    # action = agent.act(np.array([state_with_history.reshape(-1)]))
-
-    # print(np.mean(state_with_history.reshape(-1)))#check if state is changing
 
     epi_step +=1
     next_state = sim.step(action)
@@ -124,18 +131,12 @@ for step in range(steps):
     # add to the transition table
     trans.add(state_with_history.reshape(-1), trans.one_hot_action(action), next_state_with_history.reshape(-1), next_state.reward, next_state.terminal)
 
-    #agent.remember(np.array([state_with_history.reshape(-1)]), action, next_state.reward, np.array([next_state_with_history.reshape(-1)]), next_state.terminal)TODO with conv
     # mark next state as current state
     state_with_history = np.copy(next_state_with_history)
     episode_reward += next_state.reward
     state = next_state
 
-    # TODO every once in a while you should test your agent here so that you can track its performance
-    #if len(agent.memory) > batch_size and step > FULL_RANDOM_STEPS:
-    #     e_change =True if FULL_RANDOM_STEPS >step else False
-    #     agent.replay(batch_size, e_change)
-
-    if step > FULL_RANDOM_STEPS:
+    if nepisodes > FULL_RANDOM_EPISODES:
         agent.train(trans.sample_minibatch())
 
     if opt.disp_on and disp_progress:
@@ -151,7 +152,18 @@ for step in range(steps):
         plt.pause(opt.disp_interval)
         plt.draw()
 
+#plts of training
 
+f, axarr = plt.subplots(2,1)
 
+axarr[0].plot(episode_reward_hist)
+axarr[0].set_ylabel(r'Total Reward',usetex=True)
+
+axarr[1].plot(epi_step_hist)
+axarr[1].set_ylabel(r'Number of steps',usetex=True)
+
+axarr[0].set_xlabel(r'Episode',usetex=True)
+axarr[1].set_xlabel(r'Episode',usetex=True)
+
+helper_save("plots/test")
 # 2. perform a final test of your model and save it
-# TODO
