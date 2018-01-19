@@ -68,7 +68,7 @@ input_shape_conv = (opt.cub_siz*opt.pob_siz,opt.cub_siz*opt.pob_siz,opt.hist_len
 use_conv =True
 agent = DQNAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
 agent.model.summary()#print mdl
-# agent.load('save/network_conc_650_episodes.h5')
+agent.load('plots/rand_start_hist_4.h5')
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
@@ -164,5 +164,5 @@ axarr[1].set_ylabel(r'Number of steps',usetex=True)
 axarr[0].set_xlabel(r'Episode',usetex=True)
 axarr[1].set_xlabel(r'Episode',usetex=True)
 
-helper_save("plots/test")
+helper_save("plots/test_rand_goal_pos")
 # 2. perform a final test of your model and save it

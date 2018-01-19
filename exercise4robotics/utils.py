@@ -4,7 +4,7 @@ class Options:
     #
     disp_on = False # you might want to set it to False for speed
     map_ind = 1
-    change_tgt = False
+    change_tgt = True #random goal pos
     states_fil = "states.csv"
     labels_fil = "labels.csv"
     network_fil = "network.json"
