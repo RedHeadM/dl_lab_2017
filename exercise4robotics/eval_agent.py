@@ -162,18 +162,22 @@ astar_steps_hist[astar_steps_hist == None] = 0
 #only compare if episode was successful
 astar_steps_hist = astar_steps_hist[termin_state]
 epi_step_hist = epi_step_hist[termin_state]
-
+diff_to_astar = epi_step_hist-astar_steps_hist
 print("==============================")
 print("success rate {}".format(nepisodes_solved_cnt/N_EPISODES_TOTAL_TEST))
-print("mean diff to astare{}".format(np.mean(epi_step_hist-astar_steps_hist)))
+print("mean diff to astare if successful {}".format(np.mean(diff_to_astar)))
+
+plot_diff_astar_eps = np.arange(N_EPISODES_TOTAL_TEST)
+plot_diff_astar_eps = plot_diff_astar_eps[termin_state]#only succ. runs
+
 
 f, axarr = plt.subplots(2,1)
 
 axarr[0].plot(episode_reward_hist)
 axarr[0].set_ylabel(r'Total Reward',usetex=True)
 
-axarr[1].plot(epi_step_hist)
-axarr[1].set_ylabel(r'Number of steps',usetex=True)
+axarr[1].plot(plot_diff_astar_eps,diff_to_astar)
+axarr[1].set_ylabel(r'Difference to astar',usetex=True)
 
 axarr[0].set_xlabel(r'Episode',usetex=True)
 axarr[1].set_xlabel(r'Episode',usetex=True)
