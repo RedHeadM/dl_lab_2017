@@ -173,10 +173,10 @@ plot_diff_astar_eps = plot_diff_astar_eps[termin_state]#only succ. runs
 
 f, axarr = plt.subplots(2,1)
 
-axarr[0].plot(episode_reward_hist)
+axarr[0].scatter(np.arange(N_EPISODES_TOTAL_TEST),episode_reward_hist,marker="+")
 axarr[0].set_ylabel(r'Total Reward',usetex=True)
 
-axarr[1].plot(plot_diff_astar_eps,diff_to_astar)
+axarr[1].scatter(plot_diff_astar_eps,diff_to_astar,marker="+")
 axarr[1].set_ylabel(r'Difference to astar',usetex=True)
 
 axarr[0].set_xlabel(r'Episode',usetex=True)
