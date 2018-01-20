@@ -12,7 +12,7 @@ from keras.layers import Conv2D,Flatten,Dense
 #tensorboard = TensorBoard(log_dir="logs/{}".format(time()))
 #start with $ tensorboard --logdir=logs/
 
-class DQNAgent:
+class QMazeAgent:
     def __init__(self, state_size, action_size,use_conv):
         self.state_size = state_size
         self.action_size = action_size
@@ -71,8 +71,8 @@ class DQNAgent:
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 
-    def act(self, state):
-        if np.random.rand() <= self.epsilon:
+    def act(self, state, enable_exploration = True):
+        if np.random.rand() <= self.epsilon and enable_exploration:
             return random.randrange(self.action_size)
         if self._use_conv:
                #reshape the input frames
@@ -110,9 +110,11 @@ class DQNAgent:
         if self.epsilon > self.epsilon_min and change_epsilon:
             self.epsilon *= self.epsilon_decay
 
-    def load(self, name):
-        self.model.load_weights(name)
+    def load(self, file_name):
+        self.model.load_weights(file_name)
+        print("agent loaded weights"+ file_name)
         self.update_target_model()
 
-    def save(self, name):
-        self.model.save_weights(name)
+    def save(self, file_name):
+        self.model.save_weights(file_name)
+        print("agent saved weights"+ file_name)

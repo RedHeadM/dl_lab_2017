@@ -179,8 +179,8 @@ class Simulator:
         #FIX for view size add boarder offsets
             tgt_y+= (self.pob_siz-1) *0.5
             tgt_x+= (self.pob_siz-1) *0.5
-            self.obj_pos[self.tgt_ind][0] = tgt_y
-            self.obj_pos[self.tgt_ind][1] = tgt_x
+            self.obj_pos[self.tgt_ind][0] = tgt_x
+            self.obj_pos[self.tgt_ind][1] = tgt_y
         else:
             choose_tgt_ind = randrange(self.fre_pos.shape[0])
             self.obj_pos[self.tgt_ind][0] = self.fre_pos[choose_tgt_ind][0]

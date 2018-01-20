@@ -1,16 +1,25 @@
 import numpy as np
 
+def append_to_hist(state, obs):
+    """
+    Add observation to the state.
+    """
+    for i in range(state.shape[0]-1):
+        state[i, :] = state[i+1, :]
+    state[-1, :] = obs
+
+
 class Options:
     #
     disp_on = False # you might want to set it to False for speed
     map_ind = 1
-    change_tgt = True #random goal pos
+    change_tgt = False #random goal pos
     states_fil = "states.csv"
     labels_fil = "labels.csv"
     network_fil = "network.json"
     weights_fil = "network.h5"
     # simulator config
-    disp_interval = .001
+    disp_interval = 1
     if map_ind == 0:
         cub_siz = 5
         pob_siz = 5 # for partial observation
