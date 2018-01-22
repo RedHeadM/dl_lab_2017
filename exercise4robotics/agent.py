@@ -77,7 +77,6 @@ class QMazeAgent:
         return np.argmax(act_values[0])  # returns action
 
     def train(self, minibatch, change_epsilon = True):
-        '''replay of the agent'''
         state_batch, action_batch, next_state_batch, reward_batch, terminal_batch = minibatch
 
         for state, action, next_state, reward, done in zip(state_batch, action_batch, next_state_batch, reward_batch, terminal_batch):

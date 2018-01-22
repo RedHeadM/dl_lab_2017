@@ -12,8 +12,9 @@ from utils     import Options, rgb2gray
 from simulator import Simulator
 from transitionTable import TransitionTable
 
-from agent import QMazeAgent
+from agent import DQNAgent
 
+from utils import append_to_hist
 
 def append_to_hist(state, obs):
     """
@@ -29,7 +30,7 @@ def helper_save(plt_file_name):
         plt.show()
     else:
         plt.tight_layout()
-        plt.savefig(plt_file_name+'.pdf', format='pdf', dpi=1000)
+        plt.savefig(plt_file_name+'.pdf', format='pdf', dpi=1000)#save as pdf first
         from matplotlib2tikz import save as tikz_save
         # tikz_save('../report/ex1/plots/test.tex', figureheight='4cm', figurewidth='6cm')
         tikz_save(plt_file_name + ".tikz", figurewidth="\\matplotlibTotikzfigurewidth", figureheight="\\matplotlibTotikzfigureheight",strict=False)
@@ -66,7 +67,7 @@ input_shape_dense = int(opt.cub_siz*opt.pob_siz*opt.cub_siz*opt.pob_siz*opt.hist
 input_shape_conv = (opt.cub_siz*opt.pob_siz,opt.cub_siz*opt.pob_siz,opt.hist_len)
 
 use_conv =True
-agent = QMazeAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
+agent = DQNAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
 agent.model.summary()#print mdl
 agent.load('plots/rand_start_hist_4.h5')
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
