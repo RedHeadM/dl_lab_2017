@@ -12,7 +12,7 @@ from utils     import Options, rgb2gray
 from simulator import Simulator
 from transitionTable import TransitionTable
 
-from agent import DQNAgent
+from agent import QMazeAgent
 
 
 def append_to_hist(state, obs):
@@ -66,7 +66,7 @@ input_shape_dense = int(opt.cub_siz*opt.pob_siz*opt.cub_siz*opt.pob_siz*opt.hist
 input_shape_conv = (opt.cub_siz*opt.pob_siz,opt.cub_siz*opt.pob_siz,opt.hist_len)
 
 use_conv =True
-agent = DQNAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
+agent = QMazeAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
 agent.model.summary()#print mdl
 agent.load('plots/rand_start_hist_4.h5')
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

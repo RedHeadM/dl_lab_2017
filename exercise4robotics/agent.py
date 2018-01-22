@@ -31,11 +31,6 @@ class QMazeAgent:
             self.target_model = self._build_model_conv()
         self.update_target_model()
 
-    def _huber_loss(self, target, prediction):
-        # sqrt(1+error^2)-1
-        error = prediction - target
-        return K.mean(K.sqrt(1+K.square(error))-1, axis=-1)
-
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
@@ -82,6 +77,7 @@ class QMazeAgent:
         return np.argmax(act_values[0])  # returns action
 
     def train(self, minibatch, change_epsilon = True):
+        '''replay of the agent'''
         state_batch, action_batch, next_state_batch, reward_batch, terminal_batch = minibatch
 
         for state, action, next_state, reward, done in zip(state_batch, action_batch, next_state_batch, reward_batch, terminal_batch):
