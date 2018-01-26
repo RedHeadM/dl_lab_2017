@@ -9,13 +9,13 @@
 '''
 __version__ = "1.0.0"
 import sys
-sys.path.append("../..") # Adds higher directory to python modules path.
-from simframework.framework.world import PltWorld
+#sys.path.append("../..") # Adds higher directory to python modules path.
+from framework.world import PltWorld
 
 import numpy as np
-from simframework.framework.environment import PltPolygon
-from simframework.framework.test import Cleaner
-from simframework.aadc.tracks.track_random_crossing import get_test_track
+from framework.environment import PltPolygon
+from framework.test import Cleaner
+from aadc.tracks.track_random_crossing import get_test_track
 
 fig_size = (4, 4)
 size_car = 0.15
