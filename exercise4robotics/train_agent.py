@@ -16,15 +16,6 @@ from agent import DQNAgent
 
 from utils import append_to_hist
 
-def append_to_hist(state, obs):
-    """
-    Add observation to the state.
-    """
-    for i in range(state.shape[0]-1):
-        state[i, :] = state[i+1, :]
-    state[-1, :] = obs
-
-
 def helper_save(plt_file_name):
     if plt_file_name is None:
         plt.show()
