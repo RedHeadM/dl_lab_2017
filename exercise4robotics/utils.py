@@ -41,7 +41,7 @@ class Options:
     act_num = 5
 
     # traing hyper params
-    hist_len = 3
+    hist_len = 3 #list len of 1 is not working with Conv2D used in the mdl
     minibatch_size  = 32
     eval_nepisodes  = 10
 

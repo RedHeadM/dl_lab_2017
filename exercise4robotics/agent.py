@@ -29,6 +29,7 @@ class QMazeAgent:
         else:
             self.model = self._build_model_conv()
             self.target_model = self._build_model_conv()
+        print("state_size: ",state_size)
         self.update_target_model()
 
     def _build_model(self):
@@ -57,14 +58,21 @@ class QMazeAgent:
                   optimizer=Adam(lr=self.learning_rate))
         # model.compile(loss='mse',
         #                optimizer=keras.optimizers.SGD(lr=0.001),)
+
+
         return model
+
+    def _append_to_hist(state, obs):
+        """
+        Add observation to the state.
+        """
+        for i in range(state.shape[0]-1):
+            state[i, :] = state[i+1, :]
+        state[-1, :] = obs
 
     def update_target_model(self):
         # copy weights from model to target_model
         self.target_model.set_weights(self.model.get_weights())
-
-    def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
 
     def act(self, state, enable_exploration = True):
         if np.random.rand() <= self.epsilon and enable_exploration:
@@ -72,7 +80,7 @@ class QMazeAgent:
         if self._use_conv:
                #reshape the input frames
               state = state.reshape(1,self.state_size[0],self.state_size[1],self.state_size[2])
-
+        print("state.shape",state.shape)
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])  # returns action
 

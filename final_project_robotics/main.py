@@ -23,23 +23,23 @@ from framework.test import Cleaner
 from aadc.tracks.track_empty import get_test_track
 import matplotlib.pyplot as plt
 from qagentcar import QAgentCar
-
+import matplotlib.pyplot as plt
 fig_size = (4, 4)
 size_car = 0.15
-sim_time = 5
+sim_time = 10
 sim_interval_s = 0.01
 print("steps: {}".format(sim_time/sim_interval_s))
 cnt_cleaner = 10
 # car grid sensor param
-grid_x_size = 100  # half to left and half to right
-grid_y_size = 100  # grids to front beciase offest
-grid_offset_y = grid_y_size * 0.5  # in the initial grid the car is in the center, ->grind in front of the car
+grid_size_x = 100  # half to left and half to right
+grid_size_y = 100  # grids to front beciase offest
+grid_offset_y = grid_size_y * 0.5  # in the initial grid the car is in the center, ->grind in front of the car
 grid_scale_x = 0.02  # 2 cm grid resolution
 grid_scale_y = grid_scale_x
 
 
 
-def run_game():
+def run_game(qcar):
     # get map made out of polygons7
     start_pos, word_size, wall_elements = get_test_track(world_size=[10,10])
 
@@ -49,18 +49,12 @@ def run_game():
                      figsize=fig_size)
 
 
-    qcar = QAgentCar(x=start_pos[0], y=start_pos[1], theta=0,  # init car pos
-                                u =[[4,5,np.pi*0.2]],# single command mode
-                                use_history =False,
-                               grid_x_size=grid_x_size, grid_y_size=grid_y_size, grid_scale_x=grid_scale_x,
-                               # perseption sensor
-                               grid_scale_y=grid_scale_y, grid_offset_y=grid_offset_y)
     world.add_element(qcar)
     # add cleaner
     i = 0
 
     while i < cnt_cleaner:
-        cleaner = Cleaner(x=0, y=0, wheelDistance=size_car, theta=0, show_path=True)
+        cleaner = Cleaner(x=0, y=0, wheelDistance=size_car, theta=0, show_path=False)
         cleaner.place_random(x_max=word_size[0] * 4 / 5, x_min=word_size[0] * 1 / 5,
                              y_max=word_size[1] * 4 / 5, y_min=word_size[1] * 1 / 5)
         world.add_element(cleaner)
@@ -101,11 +95,16 @@ def get_size(obj, seen=None):
     return size
 
 if __name__ == "__main__":
-    run_game()
-    run_game()
-    run_game()
-    run_game()
-    run_game()
+
+    qcar = QAgentCar(actions =[0,0.2*np.pi,-0.2*np.pi,0.4*np.pi,-0.4*np.pi],
+                            x=2, y=2, theta=0,radius =0.1,  # init car pos
+                            u =[[4,5,np.pi*0.2]],# single command mode
+                            use_history =False,
+                            grid_x_size=grid_size_x, grid_y_size=grid_size_y, grid_scale_x=grid_scale_x,
+                            # perseption sensor
+                            grid_scale_y=grid_scale_y, grid_offset_y=grid_offset_y)
+    run_game(qcar)
+
     # print("size qcar: {}".format(get_size(qcar)))
     # print("size cleaner: {}".format(get_size(qcar)))
     # print("hist len size qacar: {}".format(len(qcar.history)))

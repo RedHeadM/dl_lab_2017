@@ -12,11 +12,12 @@ from utils     import Options, rgb2gray
 from simulator import Simulator
 from transitionTable import TransitionTable
 
-from agent import DQNAgent
+from agent import QMazeAgent
 
 from utils import append_to_hist
 
 def helper_save(plt_file_name):
+    '''helper func to save as tikz graphic to use with latex'''
     if plt_file_name is None:
         plt.show()
     else:
@@ -39,9 +40,9 @@ FULL_RANDOM_EPISODES = 5#two full random episodes before training
 opt = Options()
 sim = Simulator(opt.map_ind, opt.cub_siz, opt.pob_siz, opt.act_num)
 # setup a large transitiontable that is filled during training
-maxlen = 10
-trans = TransitionTable(opt.state_siz, opt.act_num, opt.hist_len,
-                        opt.minibatch_size, maxlen)
+maxlen = 100000
+trans = TransitionTable(opt.state_siz, opt.act_num, opt.hist_len,opt.minibatch_size,
+                         maxlen)
 
 
 
@@ -58,7 +59,7 @@ input_shape_dense = int(opt.cub_siz*opt.pob_siz*opt.cub_siz*opt.pob_siz*opt.hist
 input_shape_conv = (opt.cub_siz*opt.pob_siz,opt.cub_siz*opt.pob_siz,opt.hist_len)
 
 use_conv =True
-agent = DQNAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
+agent = QMazeAgent(input_shape_conv, opt.act_num,use_conv=use_conv)
 agent.model.summary()#print mdl
 agent.load('plots/rand_start_hist_4.h5')
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
