@@ -34,21 +34,21 @@ size_car_cleaner = 0.2
 sim_time = 100
 sim_interval_s = 0.05
 print("steps: {}".format(sim_time/sim_interval_s))
-cnt_cleaner = 20
+cnt_cleaner = 1
 # car grid sensor param
 grid_size_x = 25  # half to left and half to right
 grid_size_y = 25  # grids to front beciase offest
 grid_offset_y = grid_size_y * 0.5  # in the initial grid the car is in the center, ->grind in front of the car
-grid_scale_x = 0.05  # 5 cm grid resolution
+grid_scale_x = 0.1  # 5 cm grid resolution
 grid_scale_y = grid_scale_x
 
 
 
 def run_game(qcar):
     # get map made out of polygons7
-    start_pos, word_size, wall_elements = get_test_track(world_size=[10,10])
+    start_pos, word_size, wall_elements = get_test_track(world_size=[5,5])
 
-    world = PltWorld(animation=False,
+    world = PltWorld(animation=True,
                      # backgroud_color="black",
                      worldsize_max=word_size,
                      figsize=fig_size)
@@ -107,7 +107,7 @@ if __name__ == "__main__":
                             x=1.5, y=1.5, theta=0.25*np.pi,radius =0.3,  # init car pos
                             u =[[4,5,np.pi*0.2]],# single command mode
                             use_history =False,
-                            # test_wights_files ="network.h5",
+                            test_wights_files ="network.h5",
                             grid_x_size=grid_size_x, grid_y_size=grid_size_y, grid_scale_x=grid_scale_x,
                             # perseption sensor
                             grid_scale_y=grid_scale_y, grid_offset_y=grid_offset_y)
