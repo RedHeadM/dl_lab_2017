@@ -31,6 +31,10 @@ class QMazeAgent:
             self.target_model = self._build_model_conv()
         print("state_size: ",state_size)
         self.update_target_model()
+        history = self.model.fit(np.zeros((1,)+state_size), np.zeros((1,5)), epochs=1, verbose=0)
+
+        # print(history.history.keys())
+        print("loss",history.history['loss'])
 
     def _build_model(self):
         # Neural Net for Deep-Q learning Model

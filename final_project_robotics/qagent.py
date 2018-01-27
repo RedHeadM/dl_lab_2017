@@ -33,10 +33,13 @@ class DQNAgent:
             self.model = self._build_model()
             self.target_model = self._build_model()
         else:
-            print("bild con mdl")
             self.model = self._build_model_conv()
             self.target_model = self._build_model_conv()
-
+        # needed  to _make_predict_function initialize before threading
+        #https://github.com/keras-team/keras/issues/2397
+        print('testing model:', self.model.predict(np.zeros((1,)+state_size)))
+        print('testing target_model:', self.target_model.predict(np.zeros((1,)+state_size)))
+        self.model.fit(np.zeros((1,)+state_size), np.zeros((1,5)), epochs=1, verbose=0)
         self.model.summary()
         print("state_size: ",state_size)
         self.update_target_model()
@@ -84,16 +87,14 @@ class DQNAgent:
     def act(self, state,enable_exploration = True):
         if np.random.rand() <= self.epsilon and enable_exploration:
             return random.randrange(self.action_size)
-        state = state.reshape(  self.state_size[0],self.state_size[1],self.state_size[2])
-        print("************************")
-        print("state input act shape: ",state.shape)
-        act_values = self.model.predict(np.array([state]))
+        state = state.reshape(1,self.state_size[0],self.state_size[1],self.state_size[2])
+        act_values = self.model.predict(state)
         return np.argmax(act_values[0])  # returns action
 
     def replay(self, batch_size):
         minibatch = random.sample(self.memory, batch_size)
         for state, action, reward, next_state, done in minibatch:
-            if self._use_conv:
+            if self.use_conv:
                    #reshape the input frames
                   state = state.reshape(1,self.state_size[0],self.state_size[1],self.state_size[2])
                   #reshape the next input frames
@@ -114,6 +115,7 @@ class DQNAgent:
 
     def load(self, name):
         self.model.load_weights(name)
+        self.update_target_model()
 
     def save(self, name):
         self.model.save_weights(name)
