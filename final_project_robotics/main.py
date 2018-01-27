@@ -24,6 +24,11 @@ from aadc.tracks.track_empty import get_test_track
 import matplotlib.pyplot as plt
 from qagentcar import QAgentCar
 import matplotlib.pyplot as plt
+
+
+import keras
+keras.backend.clear_session()#TODO
+
 fig_size = (4, 4)
 size_car = 0.15
 sim_time = 10

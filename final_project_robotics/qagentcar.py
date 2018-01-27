@@ -26,21 +26,33 @@ import matplotlib.pyplot as plt  # call after pltworld import
 
 from qagent import DQNAgent
 
+
+
+
+
 # define class
 class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGridSensor,DQNAgent):
     DEBUG = True
     CONST_SPEED = 1
 
-    def __init__(self,actions,grid_x_size,grid_y_size,radius, x=0, y=0, theta=np.pi, **kwargs):
+    def __init__(self,actions,grid_x_size,grid_y_size,radius, x=0, y=0, theta=np.pi, use_conv=True,hist_len = 2, **kwargs):
         self._actions = actions
         super().__init__(x=x, y=y, theta=theta,  # circle agent ui
                         grid_x_size=grid_x_size, grid_y_size=grid_y_size,#grid sensor
                         range=(radius + 0.02), offfset=radius + 0.01, **kwargs)  # bumper sensor
-        DQNAgent.__init__(self,state_size =(grid_x_size,grid_y_size,1), action_size = len(actions))
-        self.current_state = np.zeros((grid_x_size, grid_y_size,1))
+
+        if use_conv:
+            assert hist_len >= 2
+            self._state_size = (grid_x_size, grid_y_size, hist_len)
+            self.qagent = DQNAgent(state_size =self._state_size, action_size = len(actions),use_conv=use_conv)
+        else:
+            self._state_size = (grid_x_size* grid_y_size *hist_len)
+            self.qagent = DQNAgent(state_size =self._state_size, action_size = len(actions),use_conv=use_conv)
+
         self.last_distance = 0
         self.current_u_index = 0
-
+        self._state_with_history = np.zeros((hist_len,(grid_x_size* grid_y_size)))
+        self._next_state_with_history = np.copy(self._state_with_history)
 
     def sim_step_output(self, step, dt):
 
@@ -48,16 +60,23 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         grid_data = self.get_last_grid_data(step)
         # sensor is configured in the way that view to front
         # next_state = grid_data.reshape((1,self._grid_size_x,self._grid_size_y,1))
-        next_state = np.array([grid_data.reshape(self._grid_size_x,self._grid_size_y,1)])
+
+
+        next_state =grid_data.reshape(-1)
+        self._append_to_hist(self._next_state_with_history, next_state)
+        print("self._next_state_with_history.shape:  ",self._next_state_with_history.shape)
         if step != 0:
             #agent.remember(state, action, reward, next_state, done)
             # print("step {} reward {}".format(step,self.get_reward()))
-            self.remember(self.current_state,self.current_u_index,self.get_reward(),next_state,False)
+            self.qagent.remember(self._state_with_history.reshape(-1),self.current_u_index,self.get_reward(),self._next_state_with_history.reshape(-1),False)
             if step >32:
-                self.replay(32)
+                self.qagent.replay(32)
+        else:
+            print("************************")
+            print("state input shape: ",next_state.shape)
 
-        self.current_state = next_state
-        self.current_u_index = np.argmax(self.act(self.current_state,False))
+        self._state_with_history = np.copy(self._next_state_with_history)
+        self.current_u_index = self.qagent.act(self._state_with_history,False)
         next_u = [self.CONST_SPEED, self.CONST_SPEED, self._actions[self.current_u_index]]
 
         # change the color if lane is touched
@@ -75,3 +94,11 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
             return -100
         else:
             return dist_reward
+
+    def _append_to_hist(self,state, obs):
+        """
+        Add observation to the state.
+        """
+        for i in range(state.shape[0]-1):
+            state[i, :] = state[i+1, :]
+        state[-1, :] = obs
