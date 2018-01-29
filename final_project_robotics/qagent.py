@@ -28,6 +28,7 @@ class DQNAgent:
         self.epsilon_decay = 0.99
         self.learning_rate = 0.001
         self.use_conv = use_conv
+        self.history_len = state_size[2]
         print("use_conv",use_conv)
         if not use_conv:
             self.model = self._build_model()
