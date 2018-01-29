@@ -54,13 +54,14 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         self._state_with_history = np.zeros((hist_len,(grid_x_size* grid_y_size)))
         self._next_state_with_history = np.copy(self._state_with_history)
         self._reward_last = collections.deque(maxlen=50)
+        self._cmds_last = collections.deque(maxlen=5)
         self._world_size = world_size
         self._reposion_at_start_counter = 0 # counter to fill history if repostion
         self._agent_vaild_steps = 0
         if test_wights_files is not None:
             self.qagent.load(test_wights_files)
             self.test_enabled = True
-            print("QAgentCar in TEST MODE!")
+            print("QAgentCar in TEST MODE! loading " + test_wights_files)
         else:
             self.test_enabled = False
 
@@ -86,9 +87,10 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
             if self._reposion_at_start_counter == self.qagent.history_len:
                 self.change_color("blue")
             #wait untill agent has valid data is history after jump
-            reward =self.get_reward()
+            reward = self.get_reward()#TODO ist reward for next state?
             self._agent_vaild_steps += 1
-            is_terminate_state = self.collistion() != BumperSensor.NONE
+            is_terminate_state = False# here always false since next_state can be used
+            #is_terminate_state = self.collistion() != BumperSensor.NONE
             self.qagent.remember(self._state_with_history.reshape(-1),self.current_u_index,reward,self._next_state_with_history.reshape(-1),is_terminate_state)
             self._reward_last.append(reward)
             if self._agent_vaild_steps >32 and not self.test_enabled:
@@ -96,7 +98,8 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
 
         self._state_with_history = np.copy(self._next_state_with_history)
         #no expporation in action if self.test_enabled
-        self.current_u_index = self.qagent.act(self._state_with_history, not self.test_enabled)
+        self.current_u_index = self.qagent.act(self._state_with_history,enable_exploration = not self.test_enabled)
+        self._cmds_last.append(self._actions[self.current_u_index])
         next_u = [self.CONST_SPEED, self.CONST_SPEED, self._actions[self.current_u_index]]
 
         if step %50 == 0:
@@ -107,13 +110,14 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
             if not self.test_enabled:
                 self.qagent.update_target_model()
                 self.qagent.save("network.h5")
+                print("saved!")
 
         # change the color if lane is touched
         if self.collistion() != BumperSensor.NONE:
             self.change_color("red")
             if self._reposion_at_start_counter >= self.qagent.history_len:
                 print("*********************************")
-                print("collistion! setps since last collision: {}".format(self._reposion_at_start_counter))
+                print("collistion! setps since last collision: {} train_stesp {} epsilon: {:.2} last cmds {}".format(self._reposion_at_start_counter,self._agent_vaild_steps,self.qagent.epsilon,self._cmds_last))
                 print("*********************************")
             self._reposion_at_start_counter = 0 #reset counter and fill history after jump
             super().sim_step_output(step, dt)
@@ -135,12 +139,12 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         if dist_reward ==0:
             print("WARNING dist_reward is zero!")
         reward_stright = 0.
-        if self.u[0][2] == 0:
-            reward_stright = 5. #last stearing angle was 0
+        # if self.u[0][2] == 0:
+            # reward_stright = 5. #last stearing angle was 0
 
         self.last_distance = current_moved_distance
         if self.collistion() != BumperSensor.NONE:
-            return -10.
+            return -100.
         else:
             return dist_reward +reward_stright
 
@@ -149,5 +153,5 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         Add observation to the state.
         """
         for i in range(state.shape[0]-1):
-            state[i, :] = state[i+1, :]
+            state[i, :] = state[i+1, :]#TODO np.roll
         state[-1, :] = obs

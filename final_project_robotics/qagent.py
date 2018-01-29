@@ -26,7 +26,7 @@ class DQNAgent:
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
-        self.learning_rate = 0.001
+        self.learning_rate = 0.001#0.001
         self.use_conv = use_conv
         self.history_len = state_size[2]
         print("use_conv",use_conv)
@@ -38,9 +38,11 @@ class DQNAgent:
             self.target_model = self._build_model_conv()
         # needed  to _make_predict_function initialize before threading
         #https://github.com/keras-team/keras/issues/2397
+        w = self.model.get_weights()
         print('testing model:', self.model.predict(np.zeros((1,)+state_size)))
         print('testing target_model:', self.target_model.predict(np.zeros((1,)+state_size)))
         self.model.fit(np.zeros((1,)+state_size), np.zeros((1,5)), epochs=1, verbose=0)
+        self.model.set_weights(w)
         self.model.summary()
         print("state_size: ",state_size)
         self.update_target_model()
@@ -70,7 +72,7 @@ class DQNAgent:
         model.add(Flatten())
         model.add(Dense(512, activation='relu'))
         model.add(Dense(self.action_size))
-        model.compile(loss='mse',
+        model.compile(loss=self._huber_loss,#loss='mse',
                   optimizer=Adam(lr=self.learning_rate))
         # model.compile(loss='mse',
         #                optimizer=keras.optimizers.SGD(lr=0.001),)
@@ -85,7 +87,7 @@ class DQNAgent:
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
 
-    def act(self, state,enable_exploration = True):
+    def act(self, state, enable_exploration = True):
         if np.random.rand() <= self.epsilon and enable_exploration:
             return random.randrange(self.action_size)
         state = state.reshape(1,self.state_size[0],self.state_size[1],self.state_size[2])
@@ -95,6 +97,8 @@ class DQNAgent:
     def replay(self, batch_size):
         minibatch = random.sample(self.memory, batch_size)
         for state, action, reward, next_state, done in minibatch:
+
+
             if self.use_conv:
                    #reshape the input frames
                   state = state.reshape(1,self.state_size[0],self.state_size[1],self.state_size[2])
@@ -110,7 +114,11 @@ class DQNAgent:
                 a = self.model.predict(next_state)[0]
                 t = self.target_model.predict(next_state)[0]
                 target[0][action] = reward + self.gamma * t[np.argmax(a)]
-            self.model.fit(state, target, epochs=1, verbose=0)
+            history = self.model.fit(state, target, epochs=1, verbose=0)
+            # print(history.history.keys())
+            # print("loss",history.history['loss'])
+            if np.isnan(history.history['loss']):
+                print("ERROR loss is nan")
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
