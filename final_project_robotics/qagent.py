@@ -26,7 +26,7 @@ class DQNAgent:
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
-        self.learning_rate = 0.001#0.001
+        self.learning_rate = 0.0001
         self.use_conv = use_conv
         self.history_len = state_size[2]
         print("use_conv",use_conv)
@@ -52,15 +52,15 @@ class DQNAgent:
         error = prediction - target
         return K.mean(K.sqrt(1+K.square(error))-1, axis=-1)
 
-    # def _build_model(self):
-    #     # Neural Net for Deep-Q learning Model
-    #     model = Sequential()
-    #     model.add(Dense(5000, input_dim=self.state_size, activation='relu'))
-    #     model.add(Dense(2000, activation='relu'))
-    #     model.add(Dense(self.action_size, activation='linear'))
-    #     model.compile(loss=self._huber_loss,
-    #                   optimizer=Adam(lr=self.learning_rate))
-    #     return model
+    def _build_model(self):
+        # Neural Net for Deep-Q learning Model
+        model = Sequential()
+        model.add(Dense(5000, input_dim=self.state_size, activation='relu'))
+        model.add(Dense(2000, activation='relu'))
+        model.add(Dense(self.action_size, activation='linear'))
+        model.compile(loss=self._huber_loss,
+                      optimizer=Adam(lr=self.learning_rate))
+        return model
 
     def _build_model_conv(self):
         model = Sequential()
@@ -75,9 +75,7 @@ class DQNAgent:
         model.compile(loss=self._huber_loss,#loss='mse',
                   optimizer=Adam(lr=self.learning_rate))
         # model.compile(loss='mse',
-        #                optimizer=keras.optimizers.SGD(lr=0.001),)
-
-
+        #                optimizer=keras.optimizers.SGD(lr=self.learning_rate),)
         return model
 
     def update_target_model(self):
@@ -98,7 +96,6 @@ class DQNAgent:
         minibatch = random.sample(self.memory, batch_size)
         for state, action, reward, next_state, done in minibatch:
 
-
             if self.use_conv:
                    #reshape the input frames
                   state = state.reshape(1,self.state_size[0],self.state_size[1],self.state_size[2])
@@ -118,13 +115,23 @@ class DQNAgent:
             # print(history.history.keys())
             # print("loss",history.history['loss'])
             if np.isnan(history.history['loss']):
-                print("ERROR loss is nan")
+                print("ERROR loss is nan!")
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
     def load(self, name):
         self.model.load_weights(name)
         self.update_target_model()
+        #DEBUG prints to check loading and save
+        print(' zeros testing model:', self.model.predict(np.zeros((1,)+self.state_size)))
+        print(' ones testing model:', self.model.predict(np.ones((1,)+self.state_size)))
 
     def save(self, name):
-        self.model.save_weights(name)
+        #DEBUG prints to check loading and save
+        print(' zeros testing model:', self.model.predict(np.zeros((1,)+self.state_size)))
+        print(' ones testing model:', self.model.predict(np.ones((1,)+self.state_size)))
+        if np.any(np.isnan(self.model.predict(np.zeros((1,)+self.state_size)))):
+            print("ERRRR nan in predict")
+        if np.any(np.isnan(self.model.predict(np.ones((1,)+self.state_size)))):
+            print("ERRRR nan in predict")
+        self.model.save_weights(name,overwrite=True)

@@ -53,11 +53,11 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         self.current_u_index = 0
         self._state_with_history = np.zeros((hist_len,(grid_x_size* grid_y_size)))
         self._next_state_with_history = np.copy(self._state_with_history)
-        self._reward_last = collections.deque(maxlen=50)
-        self._cmds_last = collections.deque(maxlen=5)
+        self._cmds_last = collections.deque(maxlen=5)#last cmds to observe what the agent is doing without the animation
         self._world_size = world_size
-        self._reposion_at_start_counter = 0 # counter to fill history if repostion
-        self._agent_vaild_steps = 0
+        self._steps_since_last_collision = 0 # cnt the steps for print outs and vaild trainning samples
+        self._agent_vaild_training_steps = 0 # training steps: enough data was in the state with history to add a training sample
+
         if test_wights_files is not None:
             self.qagent.load(test_wights_files)
             self.test_enabled = True
@@ -68,64 +68,65 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
 
     def sim_init(self, simulation_duration, dt):
         super().sim_init(simulation_duration, dt)
-        # self._state_size = (50, 50, 2)
-        # self.qagent = DQNAgent(state_size =self._state_size, action_size = 5,use_conv=True)
 
     def sim_step_output(self, step, dt):
 
-        # get sensor simulated_training_data
+        self._steps_since_last_collision += 1
+
+        # get data from the PerceptionGridSensor
+        # a occupancy grid map form a local agent view
+        # the grid and history is the current next state of the agent
         grid_data = self.get_last_grid_data(step)
-        # sensor is configured in the way that view to front
-        #check if aganed was replaced befre and is now at a postion with no collsion
-
-        self._reposion_at_start_counter += 1
-
+        #DEBUG prints
+        # if (np.any(grid_data)):
+        #     print("collsion in grid_data")
+        # else:
+        #     print("NO collsion in grid_data")
         next_state =grid_data.reshape(-1)
         self._append_to_hist(self._next_state_with_history, next_state)
 
-        if self._reposion_at_start_counter >= self.qagent.history_len:
-            if self._reposion_at_start_counter == self.qagent.history_len:
+        #wait untill agent has valid data is history after jump
+        if self._steps_since_last_collision >= self.qagent.history_len and not self.test_enabled:
+            if self._steps_since_last_collision == self.qagent.history_len:
                 self.change_color("blue")
-            #wait untill agent has valid data is history after jump
-            reward = self.get_reward()#TODO ist reward for next state?
-            self._agent_vaild_steps += 1
-            is_terminate_state = False# here always false since next_state can be used
+            self._agent_vaild_training_steps += 1
+            #ADD the data to the memory of the agent and replay
+            next_reward = self.get_reward()
+            is_terminate_state = False # here always false since next_state can be used
             #is_terminate_state = self.collistion() != BumperSensor.NONE
-            self.qagent.remember(self._state_with_history.reshape(-1),self.current_u_index,reward,self._next_state_with_history.reshape(-1),is_terminate_state)
-            self._reward_last.append(reward)
-            if self._agent_vaild_steps >32 and not self.test_enabled:
+            self.qagent.remember(self._state_with_history.reshape(-1),self.current_u_index,next_reward,self._next_state_with_history.reshape(-1),is_terminate_state)
+            if self._agent_vaild_training_steps >32:
                 self.qagent.replay(32)#train the agent
 
+        #Let the agent act on the current state
         self._state_with_history = np.copy(self._next_state_with_history)
         #no expporation in action if self.test_enabled
         self.current_u_index = self.qagent.act(self._state_with_history,enable_exploration = not self.test_enabled)
-        self._cmds_last.append(self._actions[self.current_u_index])
-        next_u = [self.CONST_SPEED, self.CONST_SPEED, self._actions[self.current_u_index]]
+        stearing_cmd = self._actions[self.current_u_index]
+        self._cmds_last.append(stearing_cmd)# save last cmds to see hat agent is doing without animation
+        next_u = [self.CONST_SPEED, self.CONST_SPEED, stearing_cmd]
 
+        #save
         if step %50 == 0:
-            # print("*********************************")
-            # print("reward of last {} steps: {} agent epsilon: {:.2} agent pos: {}"\
-            #     .format(self._reward_last.maxlen,np.sum(self._reward_last),self.qagent.epsilon,self.get_position()))
-            # print("*********************************")
             if not self.test_enabled:
                 self.qagent.update_target_model()
                 self.qagent.save("network.h5")
                 print("saved!")
 
-        # change the color if lane is touched
+        # check for collision
         if self.collistion() != BumperSensor.NONE:
             self.change_color("red")
-            if self._reposion_at_start_counter >= self.qagent.history_len:
+            if self._steps_since_last_collision >= self.qagent.history_len:
                 print("*********************************")
-                print("collistion! setps since last collision: {} train_stesp {} epsilon: {:.2} last cmds {}".format(self._reposion_at_start_counter,self._agent_vaild_steps,self.qagent.epsilon,self._cmds_last))
+                print("collistion! setps since last collision: {} train_stesp {} epsilon: {:.2} last cmds {}".format(self._steps_since_last_collision,self._agent_vaild_training_steps,self.qagent.epsilon,self._cmds_last))
                 print("*********************************")
-            self._reposion_at_start_counter = 0 #reset counter and fill history after jump
+            self._steps_since_last_collision = 0 #reset counter and fill history after jump
             super().sim_step_output(step, dt)
             #reset the agent at start pos
             # self.set_postion(self._init_pos)
             self.place_ramdom_in_world()
         else:
-        # set steering:
+            # set the agent steering cmd:
             self.sim_output_set_next_u(next_u)
             super().sim_step_output(step, dt)
 
@@ -139,8 +140,8 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         if dist_reward ==0:
             print("WARNING dist_reward is zero!")
         reward_stright = 0.
-        # if self.u[0][2] == 0:
-            # reward_stright = 5. #last stearing angle was 0
+        if self.u[0][2] == 0:
+            reward_stright = 5. #last stearing angle was 0
 
         self.last_distance = current_moved_distance
         if self.collistion() != BumperSensor.NONE:
@@ -155,3 +156,8 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         for i in range(state.shape[0]-1):
             state[i, :] = state[i+1, :]#TODO np.roll
         state[-1, :] = obs
+        #DEBUG check if state history is same
+        if QAgentCar.DEBUG:
+            for i in range(state.shape[0]-1):
+                if np.array_equal(state[i, :],state[i+1, :]) and not np.any(state[i, :]):
+                    print("WARNING state history is equal!")
