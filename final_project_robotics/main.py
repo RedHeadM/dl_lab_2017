@@ -39,14 +39,14 @@ sim_interval_s = 0.05
 print("steps: {}".format(sim_time/sim_interval_s))
 
 #random cleaner bots param
-RANDOM_CLEANER_CNT = 15
+RANDOM_CLEANER_CNT = 10
 SIZE_CLEANER_CAR = 0.2
 
 # occupancy grid map for the local agent view
 grid_size_x = 50  # half to left and half to right
 grid_size_y = grid_size_x # grids to front beciase offest
 grid_offset_y = grid_size_y * 0.5  # in the initial grid the car is in the center, ->grind in front of the car
-grid_scale_x = 0.1  # TODO real grid resolution is currently 1/2
+grid_scale_x = 0.1  # TODO  real grid resolution is currently 1/2
 grid_scale_y = grid_scale_x
 
 def is_in_elements(el, elements):
@@ -102,7 +102,7 @@ if __name__ == "__main__":
                             test_wights_files ="network.h5",#file to load test weights, if loaded no training
                             use_history = False,# disable agent position history
                             # perseption grid sensor:
-                            use_gird_history = True,
+                            use_gird_history = False,
                             grid_x_size=grid_size_x, grid_y_size=grid_size_y, grid_scale_x=grid_scale_x,
                             grid_scale_y=grid_scale_y, grid_offset_y=grid_offset_y)
 

@@ -32,6 +32,7 @@ import collections
 
 # define class
 class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGridSensor,DQNAgent):
+    ''' agent run in the simframework: action take place in the simulation output stage'''
     DEBUG = True
     CONST_SPEED = 2
 
