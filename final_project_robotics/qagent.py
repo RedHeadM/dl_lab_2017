@@ -17,6 +17,8 @@ from keras.layers import Conv2D, Flatten, Dense
 from keras.optimizers import Adam
 from keras import backend as K
 
+from  framework.utils.log import log
+
 class DQNAgent:
     def __init__(self, state_size, action_size, use_conv):
         self.state_size = state_size
@@ -26,10 +28,11 @@ class DQNAgent:
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
-        self.learning_rate = 0.0001
+        self.learning_rate = 0.001
         self.use_conv = use_conv
+        self.last_loss_replay = 0
         self.history_len = state_size[2]
-        print("use_conv",use_conv)
+        log.debug("use_conv: {}".format(use_conv))
         if not use_conv:
             self.model = self._build_model()
             self.target_model = self._build_model()
@@ -39,12 +42,13 @@ class DQNAgent:
         # needed  to _make_predict_function initialize before threading
         #https://github.com/keras-team/keras/issues/2397
         w = self.model.get_weights()
-        print('testing model:', self.model.predict(np.zeros((1,)+state_size)))
-        print('testing target_model:', self.target_model.predict(np.zeros((1,)+state_size)))
-        self.model.fit(np.zeros((1,)+state_size), np.zeros((1,5)), epochs=1, verbose=0)
+        log.debug('testing model: {}'.format( self.model.predict(np.zeros((1,)+state_size))))
+        log.debug('testing target_model: {}'.format( self.target_model.predict(np.zeros((1,)+state_size))))
+        self.model.fit(np.zeros((1,)+state_size), np.zeros((1,self.action_size)), epochs=1, verbose=0)
         self.model.set_weights(w)
         self.model.summary()
-        print("state_size: ",state_size)
+        log.debug("state_size: {}".format(state_size))
+        log.debug("action_size: {}".format(action_size))
         self.update_target_model()
 
     def _huber_loss(self, target, prediction):
@@ -94,6 +98,7 @@ class DQNAgent:
 
     def replay(self, batch_size):
         minibatch = random.sample(self.memory, batch_size)
+        loss = 0.
         for state, action, reward, next_state, done in minibatch:
 
             if self.use_conv:
@@ -112,10 +117,13 @@ class DQNAgent:
                 t = self.target_model.predict(next_state)[0]
                 target[0][action] = reward + self.gamma * t[np.argmax(a)]
             history = self.model.fit(state, target, epochs=1, verbose=0)
-            # print(history.history.keys())
-            # print("loss",history.history['loss'])
-            if np.isnan(history.history['loss']):
-                print("ERROR loss is nan!")
+            # log.error(history.history.keys())
+            # log.error("loss".format(history.history['loss']))
+            l = history.history['loss']
+            loss +=np.mean(l)
+            if np.isnan(l):
+                log.error("loss is nan!")
+        self.last_loss_replay = loss
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
@@ -123,15 +131,15 @@ class DQNAgent:
         self.model.load_weights(name)
         self.update_target_model()
         #DEBUG prints to check loading and save
-        print(' zeros testing model:', self.model.predict(np.zeros((1,)+self.state_size)))
-        print(' ones testing model:', self.model.predict(np.ones((1,)+self.state_size)))
+        # log.error(' zeros testing model:', self.model.predict(np.zeros((1,)+self.state_size)))
+        # log.error(' ones testing model:', self.model.predict(np.ones((1,)+self.state_size)))
 
     def save(self, name):
         #DEBUG prints to check loading and save
-        print(' zeros testing model:', self.model.predict(np.zeros((1,)+self.state_size)))
-        print(' ones testing model:', self.model.predict(np.ones((1,)+self.state_size)))
+        # log.error(' zeros testing model:', self.model.predict(np.zeros((1,)+self.state_size)))
+        # log.error(' ones testing model:', self.model.predict(np.ones((1,)+self.state_size)))
         if np.any(np.isnan(self.model.predict(np.zeros((1,)+self.state_size)))):
-            print("ERRRR nan in predict")
+            log.error("nan in predict")
         if np.any(np.isnan(self.model.predict(np.ones((1,)+self.state_size)))):
-            print("ERRRR nan in predict")
+            log.error("nan in predict")
         self.model.save_weights(name,overwrite=True)
