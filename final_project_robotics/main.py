@@ -33,7 +33,7 @@ keras.backend.clear_session()
 #simulation param
 fig_size = (4, 4)
 
-sim_time = 200
+sim_time = 500
 sim_interval_s = 0.05
 
 print("steps: {}".format(sim_time/sim_interval_s))
@@ -43,16 +43,18 @@ RANDOM_CLEANER_CNT = 10
 SIZE_CLEANER_CAR = 0.2
 
 # occupancy grid map for the local agent view
-grid_size_x = 30      # half to left and half to right
-grid_size_y = grid_size_x # grids to front beciase offest
-grid_offset_y = grid_size_y * 0.4  # in the initial grid the car is in the center, ->grind in front of the car
+grid_size_x = 15      # half to left and half to right
+grid_size_y = 30 # grids points to front
+grid_offset_y = grid_size_y * 0.5  # in the initial grid the car is in the center, ->grind in front of the car
 grid_scale_x = 0.1  # TODO  real grid resolution is currently 1/2
 grid_scale_y = grid_scale_x
 
 # restore_wights_files = "network.h5"
 restore_wights_files = None
-test_wights_files = None
-# test_wights_files = "network.h5"
+
+#if test file is not None the animation is enabled and no train
+# test_wights_files = None
+test_wights_files = "network.h5"
 
 
 def helper_is_in_elements(el, elements):
@@ -101,16 +103,16 @@ def helper_run_game(qcar, world_size =[5,5], cnt_cleaner =1,):
 if __name__ == "__main__":
     world_size=[3,3]
     u = QAgentCar.MAX_SPEED
-    u_s = u*0.5
-    u_ss = u*0.2 #side strong
+    u_s = u*0.75
+    u_ss = u*0.5 #side stearing
     # u_b  = -u*0.25#back
     # actions =  [[u,u,0],[u,u,0.2*np.pi],[u,u,-0.2*np.pi],[u_ss,u_ss,0.4*np.pi],[u_ss,u_ss,-0.4*np.pi],[u_b,u_b,0.4*np.pi],[u_b,u_b,-0.4*np.pi]]
     #action like: [u_right,u_left, stearing_cmd in rad]
     actions =  [[u,u,0],[u_s,u_s,0.2*np.pi],[u_s,u_s,-0.2*np.pi],[u_ss,u_ss,0.4*np.pi],[u_ss,u_ss,-0.4*np.pi]]
 
     qcar = QAgentCar(actions = actions,#action the agent can perform
-                            x=1.5, y=1.5, theta=0.25*np.pi,radius =0.3,  # init car pos
-                            u =[[4,5,np.pi*0.2]],# single command mode for the SimpleCarMdl in [u_1,u_2, stearing_cmd]
+                            x=1.5, y=1.5, theta=0.25*np.pi,radius =0.25 ,color ="darkorange",  # init car pos
+                            u =[[4,5,np.pi*0.2]],# single command mode for the SimpleCarMdl in [[u_1,u_2, stearing_cmd]]
                             world_size = world_size,# world size for random postion after collisions
                             hist_len = 2,
                             restore_wights_files = restore_wights_files,

@@ -34,7 +34,7 @@ from  framework.utils.log import log
 class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGridSensor,DQNAgent):
     ''' agent run in the simframework: action take place in the simulation output stage'''
     DEBUG = True
-    MAX_SPEED = 1.5
+    MAX_SPEED = 1.
 
     def __init__(self,actions,grid_x_size,grid_y_size,radius, world_size, x=0, y=0, theta=np.pi, use_conv=True,hist_len = 2,test_wights_files = None, restore_wights_files = None,save_file="network.h5", **kwargs):
         self._actions = actions
@@ -91,8 +91,8 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
 
         #wait untill agent has valid data is history after jump
         if self._steps_since_last_collision >= self.qagent.history_len and not self.test_enabled:
-            if self._steps_since_last_collision == self.qagent.history_len:
-                self.change_color("blue")
+            # if self._steps_since_last_collision == self.qagent.history_len:
+                # self.change_color("orange")
             self._agent_vaild_training_steps += 1
             #ADD the data to the memory of the agent and replay
             next_reward = self.get_reward()
@@ -117,7 +117,7 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
 
         # check for collision
         if self.collistion() != BumperSensor.NONE:
-            self.change_color("red")
+            # self.change_color("orange")
             if self._steps_since_last_collision >= self.qagent.history_len:
                 # log.info("collistion! setps since last collision: {} train_stesp {}, last loss {} epsilon: {:.2} last cmds {}".format(self._steps_since_last_collision,self._agent_vaild_training_steps,self.qagent.last_loss_replay,self.qagent.epsilon,self._cmds_last))
                 log.info("collistion! setps since last collision: {} train_stesp {}, loss sum last batch: {} epsilon: {:.2}".format(self._steps_since_last_collision,self._agent_vaild_training_steps,self.qagent.last_loss_replay,self.qagent.epsilon))
@@ -153,13 +153,8 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
 
     def _append_to_hist(self,state, obs):
         """
-        Add observation to the state.
+        Add observation to the state with history.
         """
         for i in range(state.shape[0]-1):
             state[i, :] = state[i+1, :]#TODO np.roll
         state[-1, :] = obs
-        #DEBUG check if state history is same
-        if QAgentCar.DEBUG:
-            for i in range(state.shape[0]-1):
-                if np.array_equal(state[i, :],state[i+1, :]) and not np.any(state[i, :]):
-                    log.warning("state history is equal!")
