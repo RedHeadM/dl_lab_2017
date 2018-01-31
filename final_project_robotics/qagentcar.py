@@ -119,10 +119,8 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         if self.collistion() != BumperSensor.NONE:
             self.change_color("red")
             if self._steps_since_last_collision >= self.qagent.history_len:
-                log.info("*********************************")
                 # log.info("collistion! setps since last collision: {} train_stesp {}, last loss {} epsilon: {:.2} last cmds {}".format(self._steps_since_last_collision,self._agent_vaild_training_steps,self.qagent.last_loss_replay,self.qagent.epsilon,self._cmds_last))
-                log.info("collistion! setps since last collision: {} train_stesp {}, last loss {} epsilon: {:.2}".format(self._steps_since_last_collision,self._agent_vaild_training_steps,self.qagent.last_loss_replay,self.qagent.epsilon))
-                log.info("*********************************")
+                log.info("collistion! setps since last collision: {} train_stesp {}, loss sum last batch: {} epsilon: {:.2}".format(self._steps_since_last_collision,self._agent_vaild_training_steps,self.qagent.last_loss_replay,self.qagent.epsilon))
             self._steps_since_last_collision = 0 #reset counter and fill history after jump
             super().sim_step_output(step, dt)
             #reset the agent at start pos
