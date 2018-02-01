@@ -43,8 +43,8 @@ RANDOM_CLEANER_CNT = 10
 SIZE_CLEANER_CAR = 0.2
 
 # occupancy grid map for the local agent view
-grid_size_x = 15      # half to left and half to right
-grid_size_y = 30 # grids points to front
+grid_size_x = 50      # half to left and half to right
+grid_size_y = 50 # grids points to front
 grid_offset_y = grid_size_y * 0.5  # in the initial grid the car is in the center, ->grind in front of the car
 grid_scale_x = 0.1  # TODO  real grid resolution is currently 1/2
 grid_scale_y = grid_scale_x
@@ -54,7 +54,7 @@ restore_wights_files = None
 
 #if test file is not None the animation is enabled and no train
 test_wights_files = None
-# test_wights_files = "network.h5"
+test_wights_files = "network.h5"
 
 
 def helper_is_in_elements(el, elements):
