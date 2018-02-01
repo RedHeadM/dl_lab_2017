@@ -86,7 +86,7 @@ class DQNAgent:
         model.add(Flatten())
         model.add(Dense(512, activation='relu'))
         model.add(Dense(self.action_size))
-        model.compile(loss=self._huber_loss,#loss='mse',
+        model.compile(loss='mse',#loss=self._huber_loss,#
                   optimizer=Adam(lr=self.learning_rate))
         # model.compile(loss='mse',
         #                optimizer=keras.optimizers.SGD(lr=self.learning_rate),)

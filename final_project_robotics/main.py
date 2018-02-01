@@ -33,7 +33,7 @@ keras.backend.clear_session()
 #simulation param
 fig_size = (4, 4)
 
-sim_time = 500
+sim_time = 100
 sim_interval_s = 0.05
 
 print("steps: {}".format(sim_time/sim_interval_s))
@@ -54,7 +54,7 @@ restore_wights_files = None
 
 #if test file is not None the animation is enabled and no train
 test_wights_files = None
-# test_wights_files = "network.h5"
+test_wights_files = "network.h5"
 
 
 def helper_is_in_elements(el, elements):
@@ -68,7 +68,7 @@ def helper_run_game(qcar, world_size =[5,5], cnt_cleaner =1,):
     '''creats and run a world with side boarders and Cleaner agnets'''
     start_pos, word_size_real, wall_elements = get_test_track(world_size)
 
-    world = PltWorld(animation=test_wights_files is not None    ,
+    world = PltWorld(animation=test_wights_files is not None,
                      # backgroud_color="black",
                      worldsize_max=word_size_real,
                      figsize=fig_size)
@@ -95,7 +95,7 @@ def helper_run_game(qcar, world_size =[5,5], cnt_cleaner =1,):
     # start sim
     world.simulate(sim_interval_s=sim_interval_s,
                    sim_duration_s=sim_time,
-                   save_animation=False,
+                   save_animation=True,
                    ui_fps=None,
                    ui_close_window_after_sim=True)
 
@@ -103,12 +103,12 @@ def helper_run_game(qcar, world_size =[5,5], cnt_cleaner =1,):
 if __name__ == "__main__":
     world_size=[3,3]
     u = QAgentCar.MAX_SPEED
-    u_s = u*0.75
+    u_s = u*0.8
     u_ss = u*0.5 #side stearing
     # u_b  = -u*0.25#back
     # actions =  [[u,u,0],[u,u,0.2*np.pi],[u,u,-0.2*np.pi],[u_ss,u_ss,0.4*np.pi],[u_ss,u_ss,-0.4*np.pi],[u_b,u_b,0.4*np.pi],[u_b,u_b,-0.4*np.pi]]
-    #action like: [u_right,u_left, stearing_cmd in rad]
-    actions =  [[u,u,0],[u_s,u_s,0.2*np.pi],[u_s,u_s,-0.2*np.pi],[u_ss,u_ss,0.4*np.pi],[u_ss,u_ss,-0.4*np.pi]]
+    #actions like: [[u_right,u_left, steering_cmd in rad]] then acthion_1 =   actions[0]
+    actions =  [[u,u,0],[u_s,u_s,0.2*np.pi],[u_s,u_s,-0.2*np.pi],[u_ss,u_ss,0.5*np.pi],[u_ss,u_ss,-0.5*np.pi]]
 
     qcar = QAgentCar(actions = actions,#action the agent can perform
                             x=1.5, y=1.5, theta=0.25*np.pi,radius =0.25 ,color ="darkorange",  # init car pos
