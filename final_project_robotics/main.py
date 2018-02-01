@@ -19,8 +19,8 @@ from framework.test import Cleaner
 #differnt maps
 # from aadc.tracks.track_random_crossing import get_test_track
 # from aadc.tracks.track_circle import get_test_track
-# from aadc.tracks.track_chess import get_test_track
-from aadc.tracks.track_empty import get_test_track
+from aadc.tracks.track_chess import get_test_track
+# from aadc.tracks.track_empty import get_test_track
 
 import matplotlib.pyplot as plt
 from qagentcar import QAgentCar
@@ -33,7 +33,7 @@ keras.backend.clear_session()
 #simulation param
 fig_size = (4, 4)
 
-sim_time = 100
+sim_time = 1000
 sim_interval_s = 0.05
 
 print("steps: {}".format(sim_time/sim_interval_s))
@@ -67,7 +67,7 @@ def helper_is_in_elements(el, elements):
 def helper_run_game(qcar, world_size =[5,5], cnt_cleaner =1,):
     '''creats and run a world with side boarders and Cleaner agnets'''
     start_pos, word_size_real, wall_elements = get_test_track(world_size)
-
+    print("word_size_real",word_size_real)
     world = PltWorld(animation=test_wights_files is not None,
                      # backgroud_color="black",
                      worldsize_max=word_size_real,
@@ -95,15 +95,15 @@ def helper_run_game(qcar, world_size =[5,5], cnt_cleaner =1,):
     # start sim
     world.simulate(sim_interval_s=sim_interval_s,
                    sim_duration_s=sim_time,
-                   save_animation=True,
+                   save_animation=False,
                    ui_fps=None,
                    ui_close_window_after_sim=True)
 
 
 if __name__ == "__main__":
-    world_size=[3,3]
+    world_size=[  10,10]
     u = QAgentCar.MAX_SPEED
-    u_s = u*0.8
+    u_s = u*0.75
     u_ss = u*0.5 #side stearing
     # u_b  = -u*0.25#back
     # actions =  [[u,u,0],[u,u,0.2*np.pi],[u,u,-0.2*np.pi],[u_ss,u_ss,0.4*np.pi],[u_ss,u_ss,-0.4*np.pi],[u_b,u_b,0.4*np.pi],[u_b,u_b,-0.4*np.pi]]
