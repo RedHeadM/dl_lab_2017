@@ -23,15 +23,25 @@ class DQNAgent:
     def __init__(self, state_size, action_size, use_conv):
         self.state_size = state_size
         self.action_size = action_size
-        self.memory = deque(maxlen=2000)
         self.gamma = 0.95    # discount rate
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
-        self.learning_rate = 0.0001
+        self.learning_rate = 0.001
         self.use_conv = use_conv
         self.last_loss_replay = 0
         self.history_len = state_size[2]
+        self.memory_counter = 0
+        self.memory_size = 2000
+        self.batch_size = 64
+        size_art = 3#reward action and terminated
+        self.memory_state_size=np.prod(np.array(state_size))
+        #2 * becuse two state saved
+        self.memory = np.empty([self.memory_size,2*self.memory_state_size+size_art])
+
+
+
+
         log.debug("use_conv: {}".format(use_conv))
         if not use_conv:
             self.model = self._build_model()
@@ -86,9 +96,6 @@ class DQNAgent:
         # copy weights from model to target_model
         self.target_model.set_weights(self.model.get_weights())
 
-    def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
-
     def act(self, state, enable_exploration = True):
         if np.random.rand() <= self.epsilon and enable_exploration:
             return random.randrange(self.action_size)
@@ -96,33 +103,54 @@ class DQNAgent:
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])  # returns action
 
-    def replay(self, batch_size):
-        minibatch = random.sample(self.memory, batch_size)
-        loss = 0.
-        for state, action, reward, next_state, done in minibatch:
+    def memory_store(self, state_now, action, reward, state_next, done):
+        state_now = np.reshape(state_now, [1, self.memory_state_size])
+        state_next = np.reshape(state_next, [1, self.memory_state_size])
+        action = np.reshape(action, [1, 1])
+        reward = np.reshape(reward, [1, 1])
+        done = np.reshape(done, [1, 1])
 
-            if self.use_conv:
-                   #reshape the input frames
-                  state = state.reshape(1,self.state_size[0],self.state_size[1],self.state_size[2])
-                  #reshape the next input frames
-                  next_state = next_state.reshape(1,self.state_size[0],self.state_size[1],self.state_size[2])
-            else:
-                  state = np.array([state])
-                  next_state = np.array([next_state])
-            target = self.model.predict(state)
-            if done:
-                target[0][action] = reward
-            else:
-                a = self.model.predict(next_state)[0]
-                t = self.target_model.predict(next_state)[0]
-                target[0][action] = reward + self.gamma * t[np.argmax(a)]
-            history = self.model.fit(state, target, epochs=1, verbose=0)
+        transition = np.hstack((state_now, action, reward, state_next, done))
+        index = self.memory_counter % self.memory_size
+        self.memory[index, :] = transition
+        self.memory_counter += 1
+
+    def replay(self):
+
+        loss = 0.
+        sample_index = np.random.choice(self.memory_size, size=self.batch_size)
+        batch_memory = self.memory[sample_index, :]
+        ################################################################
+        new_state_size = self.memory_state_size
+        batch_state = batch_memory[:, :new_state_size]
+        batch_action = batch_memory[:, new_state_size].astype(int)
+        batch_reward = batch_memory[:, new_state_size+1]
+
+        batch_state_next = batch_memory[:, -new_state_size-1:-1]
+        batch_done = batch_memory[:, -1]
+
+        batch_state = batch_state.reshape(self.batch_size,self.state_size[0],self.state_size[1],self.state_size[2])
+        batch_state_next = batch_state_next.reshape(self.batch_size,self.state_size[0],self.state_size[1],self.state_size[2])
+        q_target = self.model.predict(batch_state)
+        q_next1 = self.model.predict(batch_state_next)
+        q_next2 = self.target_model.predict(batch_state_next)
+        batch_action_withMaxQ = np.argmax(q_next1, axis=1)
+        batch_index11 = np.arange(self.batch_size, dtype=np.int32)
+        q_next_Max = q_next2[batch_index11, batch_action_withMaxQ]
+        # q_target[batch_index11, batch_action] = batch_reward + (1-batch_done)*self.gamma * q_next_Max
+        q_target[batch_index11, batch_action] = batch_reward + self.gamma * q_next_Max
+        batch_state = batch_state.reshape((self.batch_size,self.state_size[0], self.state_size[1], self.state_size[2]))
+        history = self.model.fit(
+            batch_state, q_target,
+            batch_size=self.batch_size,
+            epochs=1,
+            verbose=0)
             # log.error(history.history.keys())
             # log.error("loss".format(history.history['loss']))
-            l = history.history['loss']
-            loss +=np.mean(l)
-            if np.isnan(l):
-                log.error("loss is nan!")
+        l = history.history['loss']
+        loss +=np.mean(l)
+        if np.isnan(l):
+            log.error("loss is nan!")
         self.last_loss_replay = loss
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay

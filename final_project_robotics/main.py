@@ -53,8 +53,8 @@ grid_scale_y = grid_scale_x
 restore_wights_files = None
 
 #if test file is not None the animation is enabled and no train
-# test_wights_files = None
-test_wights_files = "network.h5"
+test_wights_files = None
+# test_wights_files = "network.h5"
 
 
 def helper_is_in_elements(el, elements):

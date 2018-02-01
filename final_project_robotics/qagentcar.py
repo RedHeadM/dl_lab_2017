@@ -98,9 +98,9 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
             next_reward = self.get_reward()
             is_terminate_state = False # here always false since next_state can be used
             #is_terminate_state = self.collistion() != BumperSensor.NONE
-            self.qagent.remember(self._state_with_history.reshape(-1),self.current_u_index,next_reward,self._next_state_with_history.reshape(-1),is_terminate_state)
-            if self._agent_vaild_training_steps >32:
-                self.qagent.replay(32)#train the agent
+            self.qagent.memory_store(self._state_with_history.reshape(-1),self.current_u_index,next_reward,self._next_state_with_history.reshape(-1),is_terminate_state)
+            if self._agent_vaild_training_steps >2000:
+                self.qagent.replay()#train the agent
 
         #Let the agent act on the current state
         self._state_with_history = np.copy(self._next_state_with_history)
