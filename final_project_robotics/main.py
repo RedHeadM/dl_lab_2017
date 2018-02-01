@@ -33,7 +33,7 @@ keras.backend.clear_session()
 #simulation param
 fig_size = (4, 4)
 
-sim_time = 1000
+sim_time = 5
 sim_interval_s = 0.05
 
 print("steps: {}".format(sim_time/sim_interval_s))
@@ -101,7 +101,7 @@ def helper_run_game(qcar, world_size =[5,5], cnt_cleaner =1,):
 
 
 if __name__ == "__main__":
-    world_size=[  10,10]
+    world_size=[3,3]
     u = QAgentCar.MAX_SPEED
     u_s = u*0.75
     u_ss = u*0.5 #side stearing
@@ -123,4 +123,5 @@ if __name__ == "__main__":
                             grid_x_size=grid_size_x, grid_y_size=grid_size_y, grid_scale_x=grid_scale_x,
                             grid_scale_y=grid_scale_y, grid_offset_y=grid_offset_y)
 
+    helper_run_game(qcar, world_size, RANDOM_CLEANER_CNT)
     helper_run_game(qcar, world_size, RANDOM_CLEANER_CNT)
