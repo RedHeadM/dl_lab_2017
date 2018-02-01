@@ -69,12 +69,14 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         else:
             self.test_enabled = False
 
+    def enabled_test_mode(enable):
+        self.test_enabled = enable
 
     def sim_init(self, simulation_duration, dt):
         super().sim_init(simulation_duration, dt)
+        self._steps_since_last_collision =0
 
     def sim_step_output(self, step, dt):
-
         self._steps_since_last_collision += 1
 
         # get data from the PerceptionGridSensor
@@ -93,6 +95,7 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         if self._steps_since_last_collision >= self.qagent.history_len and not self.test_enabled:
             # if self._steps_since_last_collision == self.qagent.history_len:
                 # self.change_color("orange")
+
             self._agent_vaild_training_steps += 1
             #ADD the data to the memory of the agent and replay
             next_reward = self.get_reward()
@@ -110,7 +113,7 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         self._cmds_last.append(next_cmd)# save last cmds to see hat agent is doing without animation
 
         #update_target_model and save
-        if step %50 == 0 and step !=0 and not self.test_enabled:
+        if step % 50 == 0 and step !=0 and not self.test_enabled:
                 self.qagent.update_target_model()
                 self.qagent.save(self._save_file)
                 log.info("saved to : {}".format(self._save_file))
