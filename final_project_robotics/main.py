@@ -19,8 +19,8 @@ from framework.test import Cleaner
 #differnt maps
 # from aadc.tracks.track_random_crossing import get_test_track
 # from aadc.tracks.track_circle import get_test_track
-from aadc.tracks.track_chess import get_test_track
-# from aadc.tracks.track_empty import get_test_track
+# from aadc.tracks.track_chess import get_test_track
+from aadc.tracks.track_empty import get_test_track
 
 import matplotlib.pyplot as plt
 from qagentcar import QAgentCar
@@ -33,7 +33,7 @@ keras.backend.clear_session()
 #simulation param
 fig_size = (4, 4)
 
-sim_time = 1000
+sim_time = 500
 sim_interval_s = 0.05
 
 print("steps: {}".format(sim_time/sim_interval_s))
@@ -43,7 +43,7 @@ RANDOM_CLEANER_CNT = 10
 SIZE_CLEANER_CAR = 0.2
 
 # occupancy grid map for the local agent view
-grid_size_x = 30      # half to left and half to right
+grid_size_x = 40      # half to left and half to right
 grid_size_y = 40 # grids points to front
 grid_offset_y = grid_size_y * 0.5  # in the initial grid the car is in the center, ->grind in front of the car
 grid_scale_x = 0.1  # TODO  real grid resolution is currently 1/2
@@ -54,7 +54,7 @@ restore_wights_files = None
 
 #if test file is not None the animation is enabled and no train
 test_wights_files = None
-test_wights_files = "network.h5"
+# test_wights_files = "network.h5"
 
 
 def helper_is_in_elements(el, elements):
@@ -103,7 +103,7 @@ def helper_run_game(qcar, world_size =[5,5], cnt_cleaner =1,):
 if __name__ == "__main__":
     world_size=[3,3]
     u = QAgentCar.MAX_SPEED
-    u_s = u*0.75
+    u_s = u*0.7
     u_ss = u*0.5 #side stearing
     # u_b  = -u*0.25#back
     # actions =  [[u,u,0],[u,u,0.2*np.pi],[u,u,-0.2*np.pi],[u_ss,u_ss,0.4*np.pi],[u_ss,u_ss,-0.4*np.pi],[u_b,u_b,0.4*np.pi],[u_b,u_b,-0.4*np.pi]]

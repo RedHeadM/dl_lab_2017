@@ -39,9 +39,6 @@ class DQNAgent:
         #2 * becuse two state saved
         self.memory = np.empty([self.memory_size,2*self.memory_state_size+size_art])
 
-
-
-
         log.debug("use_conv: {}".format(use_conv))
         if not use_conv:
             self.model = self._build_model()
@@ -96,9 +93,13 @@ class DQNAgent:
         # copy weights from model to target_model
         self.target_model.set_weights(self.model.get_weights())
 
+    def act_random(self):
+        return random.randrange(self.action_size)
+
     def act(self, state, enable_exploration = True):
         if np.random.rand() <= self.epsilon and enable_exploration:
-            return random.randrange(self.action_size)
+            return self.act_random()
+
         state = state.reshape(1,self.state_size[0],self.state_size[1],self.state_size[2])
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])  # returns action
