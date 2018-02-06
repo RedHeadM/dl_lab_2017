@@ -185,7 +185,7 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
             return -100.
         else:
             # log.info("dist_reward {}".format(dist_reward))
-            return dist_reward *1 + reward_stright
+            return dist_reward * 2 + reward_stright
 
     def _append_to_hist(self,state, obs):
         """ Add observation to the state with history. """

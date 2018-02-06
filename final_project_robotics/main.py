@@ -39,7 +39,7 @@ sim_interval_s = 0.05
 # print("steps: {}".format(sim_time/sim_interval_s))
 
 #random cleaner bots param
-RANDOM_CLEANER_CNT = 10
+RANDOM_CLEANER_CNT = 6
 SIZE_CLEANER_CAR = 0.2
 COLOR_CLEANER_CAR = "red"
 
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     u_s = u*0.7
     u_ss = u*0.5 #side stearing
     # agent actions like: [[u_right,u_left, steering_cmd in rad]] then acthion_1 =   actions[0]
-    actions =  [[u,u,0],[u_s,u_s,0.2*np.pi],[u_s,u_s,-0.2*np.pi],[u_ss,u_ss,0.5*np.pi],[u_ss,u_ss,-0.5*np.pi]]
+    actions =  [[u,u,0],[u_s,u_s,0.2*np.pi],[u_s,u_s,-0.2*np.pi],[u_ss,u_ss,0.8*np.pi],[u_ss,u_ss,-0.8*np.pi]]
 
     qcar = QAgentCar(actions = actions,#action the agent can perform
                             x=1.5, y=1.5, theta=0.25*np.pi,radius =0.25 ,color ="green",  # init car pos
@@ -156,8 +156,8 @@ if __name__ == "__main__":
                             grid_x_size=grid_size_x, grid_y_size=grid_size_y, grid_scale_x=grid_scale_x,
                             grid_scale_y=grid_scale_y, grid_offset_y=grid_offset_y)
 
-    helper_run_train_game(qcar,10, world_size, RANDOM_CLEANER_CNT)
+    helper_run_train_game(qcar,1000, world_size, RANDOM_CLEANER_CNT)
     qcar.enabled_test_mode(True)
-    helper_run_train_game(qcar,10, world_size, RANDOM_CLEANER_CNT,animation=True)
+    helper_run_train_game(qcar,500, world_size, RANDOM_CLEANER_CNT,animation=True)
     cleaner_start_pos = [[1,1,1],[3,3,3],[2,2,2]]
     # helper_validation_game(qcar,2,cleaner_start_pos, world_size, RANDOM_CLEANER_CNT)
