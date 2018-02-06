@@ -34,7 +34,7 @@ from  framework.utils.log import log
 class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGridSensor,DQNAgent):
     ''' agent run in the simframework: action take place in the simulation output stage'''
     DEBUG = True
-    MAX_SPEED = 1.
+    MAX_SPEED = 1.2
 
     def __init__(self,actions,grid_x_size,grid_y_size,radius, world_size, x=0, y=0, theta=np.pi, use_conv=True,hist_len = 2,test_wights_files = None, restore_wights_files = None,save_file="network.h5", **kwargs):
         self._actions = actions
@@ -77,7 +77,7 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         super().sim_init(simulation_duration, dt)
         self._steps_since_last_collision = 0
         self.set_postion(self._init_pos)
-        if self._agent_memory_added < self.qagent.memory_size:
+        if self._agent_memory_added < self.qagent.memory_size and not self.test_enabled:
             log.info("filling qagent memory with random samples")
 
     def _update_memory(self):
@@ -182,10 +182,10 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
 
         self.last_distance = current_moved_distance
         if self.collistion() != BumperSensor.NONE:
-            return -10.
+            return -100.
         else:
             # log.info("dist_reward {}".format(dist_reward))
-            return dist_reward *100000 + reward_stright
+            return dist_reward *1 + reward_stright
 
     def _append_to_hist(self,state, obs):
         """ Add observation to the state with history. """

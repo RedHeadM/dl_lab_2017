@@ -44,9 +44,9 @@ SIZE_CLEANER_CAR = 0.2
 COLOR_CLEANER_CAR = "red"
 
 # occupancy grid map for the local agent view
-grid_size_x = 40      # half to left and half to right
+grid_size_x = 30      # half to left and half to right
 grid_size_y = 40 # grids points to front
-grid_offset_y = grid_size_y * 0.5  # in the initial grid the car is in the center, ->grind in front of the car
+grid_offset_y = grid_size_y * 0.4  # in the initial grid the car is in the center, ->grind in front of the car
 grid_scale_x = 0.1  # TODO  real grid resolution is currently 1/2
 grid_scale_y = grid_scale_x
 
@@ -75,7 +75,7 @@ def helper_run_train_game(qcar,simulation_time, world_size =[5,5], cnt_cleaner =
                      figsize=fig_size)
 
     #Enable train mode
-    qcar.enabled_test_mode(False)
+    # qcar.enabled_test_mode(False)
     elements.append(qcar)
     # create cleaner at random postions
     cnt_added = 0
@@ -110,7 +110,7 @@ def helper_validation_game(qcar,simulation_time,start_cleaner_pos, world_size =[
                      figsize=fig_size)
 
     #Enable train mode
-    qcar.enabled_test_mode(False)
+    # qcar.enabled_test_mode(False)
     elements.append(qcar)
     # create cleaner at random postions
     for pos in start_cleaner_pos:
@@ -156,8 +156,8 @@ if __name__ == "__main__":
                             grid_x_size=grid_size_x, grid_y_size=grid_size_y, grid_scale_x=grid_scale_x,
                             grid_scale_y=grid_scale_y, grid_offset_y=grid_offset_y)
 
-    helper_run_train_game(qcar,300, world_size, RANDOM_CLEANER_CNT)
+    helper_run_train_game(qcar,10, world_size, RANDOM_CLEANER_CNT)
     qcar.enabled_test_mode(True)
-    helper_run_train_game(qcar,50, world_size, RANDOM_CLEANER_CNT,animation=True)
+    helper_run_train_game(qcar,10, world_size, RANDOM_CLEANER_CNT,animation=True)
     cleaner_start_pos = [[1,1,1],[3,3,3],[2,2,2]]
     # helper_validation_game(qcar,2,cleaner_start_pos, world_size, RANDOM_CLEANER_CNT)
