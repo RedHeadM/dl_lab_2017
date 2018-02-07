@@ -34,7 +34,7 @@ keras.backend.clear_session()
 fig_size = (4, 4)
 
 
-sim_interval_s = 0.06
+sim_interval_s = 0.07
 
 # print("steps: {}".format(sim_time/sim_interval_s))
 
@@ -55,7 +55,7 @@ restore_wights_files = None
 
 #if test file is not None the animation is enabled and no train
 test_wights_files = None
-test_wights_files   = "network.h5"
+# test_wights_files   = "network.h5"
 
 
 def helper_is_in_elements(el, elements):
@@ -157,8 +157,8 @@ if __name__ == "__main__":
     world_size=[3,3]
     word_size_real = [6,6]
     u = QAgentCar.MAX_SPEED
-    u_s = u*0.8
-    u_ss = u*0.5 #side stearing
+    u_s = u#*0.8
+    u_ss = u#*0.5 #side stearing
     # agent actions like: [[u_right,u_left, steering_cmd in rad]] then acthion_1 =   actions[0]
     actions =  [[u,u,0],[u_s,u_s,0.3*np.pi],[u_s,u_s,-0.3*np.pi],[u_ss,u_ss,1.*np.pi],[u_ss,u_ss,-1.*np.pi]]
 
@@ -175,12 +175,13 @@ if __name__ == "__main__":
                             grid_x_size=grid_size_x, grid_y_size=grid_size_y, grid_scale_x=grid_scale_x,
                             grid_scale_y=grid_scale_y, grid_offset_y=grid_offset_y)
 
-    qcar.enabled_test_mode(True)
-    avg_steps = run_validation(qcar,world_size,animation= True)
+    # qcar.enabled_test_mode(True)
+    # avg_steps = run_validation(qcar,world_size,animation= True)
     #fill agent memory
     helper_run_train_game(qcar,100, world_size, RANDOM_CLEANER_CNT)
     results_train_step = []
     results_no_collisions_steps = []
+
     qcar.enabled_test_mode(False)
     for i in range(100):
         #Enable train mode
