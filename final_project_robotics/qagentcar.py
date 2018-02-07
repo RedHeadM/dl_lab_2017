@@ -34,7 +34,7 @@ from  framework.utils.log import log
 class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGridSensor,DQNAgent):
     ''' agent run in the simframework: action take place in the simulation output stage'''
     DEBUG = True
-    MAX_SPEED = 1.2
+    MAX_SPEED = 1.
 
     def __init__(self,actions,grid_x_size,grid_y_size,radius, world_size, x=0, y=0, theta=np.pi, use_conv=True,hist_len = 2,test_wights_files = None, restore_wights_files = None,save_file="network.h5", **kwargs):
         self._actions = actions
@@ -59,6 +59,7 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         self._agent_memory_added = 0
         self._agent_vaild_training_steps = 0 # training steps: enough data was in the state with history to add a training sample
         self._save_file = save_file
+        self.test_run_collision_steps = []
 
         if restore_wights_files is not None:
             log.info("weight restored: " + restore_wights_files)
@@ -79,6 +80,7 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         self.set_postion(self._init_pos)
         if self._agent_memory_added < self.qagent.memory_size and not self.test_enabled:
             log.info("filling qagent memory with random samples")
+        self.test_run_collision_steps = []
 
     def _update_memory(self):
         self._agent_memory_added += 1
@@ -108,8 +110,8 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
                 # update_target_model and save
                 if self._agent_vaild_training_steps % 50 == 0:
                     self.qagent.update_target_model()
-                if self._agent_vaild_training_steps % 500 == 0:
-                    self.save()
+                # if self._agent_vaild_training_steps % 500 == 0:
+                #     self.save()
         #Let the agent act on the current state
         self._state_with_history = np.copy(self._next_state_with_history)
         #no expporation in action if self.test_enabled
@@ -141,18 +143,23 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
 
         # reset the agent postion if collision else let the agent act
         if self.collistion() != BumperSensor.NONE:
-            if self._steps_since_last_collision >= self.qagent.history_len and self._agent_memory_added > self.qagent.memory_size:
-                log.info("collistion! setps since last collision: {}, "
-                    "train steps {}, "
-                    "loss sum last batch: {}, "
-                    "epsilon: {:.2}".format(self._steps_since_last_collision,\
-                    self._agent_vaild_training_steps,\
-                    self.qagent.last_loss_replay, self.qagent.epsilon))
+            if self.test_enabled:
+                if self._steps_since_last_collision >= self.qagent.history_len+1:
+                    self.test_run_collision_steps.append(self._steps_since_last_collision)
+            # if self._steps_since_last_collision >= self.qagent.history_len and self._agent_memory_added > self.qagent.memory_size:
+                # log.info("collistion! setps since last collision: {}, "
+                #     "train steps {}, "
+                #     "loss sum last batch: {}, "
+                #     "epsilon: {:.2}".format(self._steps_since_last_collision,\
+                #     self._agent_vaild_training_steps,\
+                #     self.qagent.last_loss_replay, self.qagent.epsilon))
             #reset counter and fill history after jump
-            self._steps_since_last_collision = 0
             #reset the agent at start pos
-            # self.set_postion(self._init_pos)
-            self.place_ramdom_in_world()
+                self.set_postion(self._init_pos)
+            else:
+                self.place_ramdom_in_world()
+
+            self._steps_since_last_collision = 0
 
         # set the agent cmd:
         self.sim_output_set_next_u(next_cmd)
@@ -160,7 +167,8 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
 
     def sim_end(self, step, dt):
         super().sim_end(step,dt)
-        self.save()
+        if not self.test_enabled and self._agent_vaild_training_steps:
+            self.save()
 
     def save(self):
         self.qagent.save(self._save_file)
@@ -185,7 +193,7 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
             return -100.
         else:
             # log.info("dist_reward {}".format(dist_reward))
-            return dist_reward * 2 + reward_stright
+            return dist_reward * 5 + reward_stright
 
     def _append_to_hist(self,state, obs):
         """ Add observation to the state with history. """
