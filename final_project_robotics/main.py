@@ -51,7 +51,7 @@ COLOR_CLEANER_CAR = "red"
 # occupancy grid map for the local agent view
 grid_size_x = 20      # half to left and half to right
 grid_size_y = 20 # grids points to front
-grid_offset_y = grid_size_y * 0.4  # in the initial grid the car is in the center, ->grind in front of the car
+grid_offset_y = grid_size_y * 0.3  # in the initial grid the car is in the center, ->grind in front of the car
 grid_scale_x = 0.15  # TODO  real grid resolution is currently 1/2
 grid_scale_y = grid_scale_x
 
@@ -75,8 +75,9 @@ def helper_run_train_game(qcar,simulation_time, world_size =[5,5], cnt_cleaner =
     start_pos, word_size_real, elements = get_test_track(world_size)
 
     world = PltWorld(name ="Training World",
-                     animation = False,#test_wights_files is not None or animation,
+                     animation = test_wights_files is not None or animation,
                      # backgroud_color="black",
+                     print_stats =False,
                      worldsize_max=word_size_real,
                      figsize=fig_size)
     qcar._world_size = word_size_real
@@ -110,9 +111,10 @@ def helper_validation_game(qcar,simulation_time,start_cleaner_pos, world_size =[
     start_pos, word_size_real, elements = get_test_track(world_size)
 
     world = PltWorld(name = "Validation World",
+                    print_stats =False,
                     animation = animation,
-                     worldsize_max=word_size_real,
-                     figsize=fig_size)
+                    worldsize_max=word_size_real,
+                    figsize=fig_size)
 
     #Enable train mode
     # qcar.enabled_test_mode(False)
@@ -162,7 +164,7 @@ if __name__ == "__main__":
     u = QAgentCar.MAX_SPEED
     world_size=[4,4]
     word_size_real = np.array(world_size) * 2
-    u_s = u*0.5
+    u_s = u*0.7
     u_ss = u*0.2 #side strong
     # u_b  = -u*0.25#back
     # actions =  [[u,u,0],[u,u,0.2*np.pi],[u,u,-0.2*np.pi],[u_ss,u_ss,0.4*np.pi],[u_ss,u_ss,-0.4*np.pi],[u_b,u_b,0.4*np.pi],[u_b,u_b,-0.4*np.pi]]
