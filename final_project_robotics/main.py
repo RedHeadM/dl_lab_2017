@@ -34,13 +34,13 @@ keras.backend.clear_session()
 fig_size = (4, 4)
 
 
-sim_interval_s = 0.07
+sim_interval_s = 0.05
 
 # print("steps: {}".format(sim_time/sim_interval_s))
 
 #random cleaner bots param
-RANDOM_CLEANER_CNT = 6
-SIZE_CLEANER_CAR = 0.2
+RANDOM_CLEANER_CNT = 15
+SIZE_CLEANER_CAR = 0.25
 COLOR_CLEANER_CAR = "red"
 
 # occupancy grid map for the local agent view
@@ -55,7 +55,7 @@ restore_wights_files = None
 
 #if test file is not None the animation is enabled and no train
 test_wights_files = None
-# test_wights_files   = "network.h5"
+test_wights_files   = "network.h5"
 
 
 def helper_is_in_elements(el, elements):
@@ -145,7 +145,7 @@ def run_validation(qcar,world_size,animation=False):
     cleaner_start_pos = [[1,1,np.pi],[3.5,3.5,1.25*np.pi],[5,5,1.25*np.pi],[1,5,1.75*np.pi],[3,1,0.7*np.pi]]
     training_steps = qcar._agent_vaild_training_steps
     steps_sum = 0
-    sim_time = 5
+    sim_time = 10
     for pos in agent_init_pos:
         qcar._init_pos  = pos
         mean_steps = helper_validation_game(qcar, sim_time,cleaner_start_pos, world_size,animation=animation)
@@ -154,11 +154,11 @@ def run_validation(qcar,world_size,animation=False):
 
 
 if __name__ == "__main__":
-    world_size=[3,3]
+    world_size=[4,4]
     word_size_real = [6,6]
     u = QAgentCar.MAX_SPEED
-    u_s = u#*0.8
-    u_ss = u#*0.5 #side stearing
+    u_s = u*0.8
+    u_ss = u*0.6 #side stearing
     # agent actions like: [[u_right,u_left, steering_cmd in rad]] then acthion_1 =   actions[0]
     actions =  [[u,u,0],[u_s,u_s,0.3*np.pi],[u_s,u_s,-0.3*np.pi],[u_ss,u_ss,1.*np.pi],[u_ss,u_ss,-1.*np.pi]]
 
@@ -174,29 +174,29 @@ if __name__ == "__main__":
                             use_gird_history = False,
                             grid_x_size=grid_size_x, grid_y_size=grid_size_y, grid_scale_x=grid_scale_x,
                             grid_scale_y=grid_scale_y, grid_offset_y=grid_offset_y)
-
+    helper_run_train_game(qcar,600, world_size, RANDOM_CLEANER_CNT)
     # qcar.enabled_test_mode(True)
     # avg_steps = run_validation(qcar,world_size,animation= True)
-    #fill agent memory
-    helper_run_train_game(qcar,100, world_size, RANDOM_CLEANER_CNT)
-    results_train_step = []
-    results_no_collisions_steps = []
-
-    qcar.enabled_test_mode(False)
-    for i in range(100):
-        #Enable train mode
-        qcar.enabled_test_mode(False)
-        helper_run_train_game(qcar,1, world_size, RANDOM_CLEANER_CNT)
-        qcar.enabled_test_mode(True)
-        avg_steps = run_validation(qcar,world_size)
-        print("training step {}: vlidation avg steps unitll collision: {}".format(avg_steps[0],avg_steps[1]))
-        results_no_collisions_steps.append(avg_steps[1])
-        results_train_step.append(avg_steps[0])
-
-    plt.close('all')
-    fig = plt.figure(figsize=(5, 5))
-    ax = plt.axes()
-
-    ax.plot(results_train_step,results_no_collisions_steps)
-    plt.savefig("val" + '.pdf', format='pdf', dpi=1000)#save as pdf first
-    plt.show()
+    # #fill agent memory
+    # helper_run_train_game(qcar,150, world_size, RANDOM_CLEANER_CNT)
+    # results_train_step = []
+    # results_no_collisions_steps = []
+    #
+    # # qcar.enabled_test_mode(False)
+    # for i in range(500):
+    #     #Enable train mode
+    #     qcar.enabled_test_mode(False)
+    #     helper_run_train_game(qcar,10, world_size, RANDOM_CLEANER_CNT)
+    #     qcar.enabled_test_mode(True)
+    #     avg_steps = run_validation(qcar,world_size)
+    #     print("training step {}: vlidation avg steps unitll collision: {}".format(avg_steps[0],avg_steps[1]))
+    #     results_no_collisions_steps.append(avg_steps[1])
+    #     results_train_step.append(avg_steps[0])
+    #
+    # plt.close('all')
+    # fig = plt.figure(figsize=(5, 5))
+    # ax = plt.axes()
+    #
+    # ax.plot(results_train_step,results_no_collisions_steps)
+    # plt.savefig("val" + '.pdf', format='pdf', dpi=1000)#save as pdf first
+    # plt.show()
