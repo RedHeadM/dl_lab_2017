@@ -25,11 +25,16 @@ from aadc.tracks.track_empty import get_test_track
 import matplotlib.pyplot as plt
 from qagentcar import QAgentCar
 import matplotlib.pyplot as plt
-
-
 import keras
 keras.backend.clear_session()
 
+import argparse
+
+
+parser = argparse.ArgumentParser(description='qcar training')
+parser.add_argument('--test_weights', default=None, help='.h5 weight file to run a test')
+args = parser.parse_args()
+args.test_weights
 #simulation param
 fig_size = (4, 4)
 
@@ -44,10 +49,10 @@ SIZE_CLEANER_CAR = 0.25
 COLOR_CLEANER_CAR = "red"
 
 # occupancy grid map for the local agent view
-grid_size_x = 30      # half to left and half to right
-grid_size_y = 40 # grids points to front
+grid_size_x = 20      # half to left and half to right
+grid_size_y = 20 # grids points to front
 grid_offset_y = grid_size_y * 0.4  # in the initial grid the car is in the center, ->grind in front of the car
-grid_scale_x = 0.1  # TODO  real grid resolution is currently 1/2
+grid_scale_x = 0.15  # TODO  real grid resolution is currently 1/2
 grid_scale_y = grid_scale_x
 
 # restore_wights_files = "network.h5"
@@ -55,7 +60,7 @@ restore_wights_files = None
 
 #if test file is not None the animation is enabled and no train
 test_wights_files = None
-test_wights_files   = "network.h5"
+test_wights_files   = args.test_weights
 
 
 def helper_is_in_elements(el, elements):
@@ -70,7 +75,7 @@ def helper_run_train_game(qcar,simulation_time, world_size =[5,5], cnt_cleaner =
     start_pos, word_size_real, elements = get_test_track(world_size)
 
     world = PltWorld(name ="Training World",
-                     animation = test_wights_files is not None or animation,
+                     animation = False,#test_wights_files is not None or animation,
                      # backgroud_color="black",
                      worldsize_max=word_size_real,
                      figsize=fig_size)
@@ -154,18 +159,20 @@ def run_validation(qcar,world_size,animation=False):
 
 
 if __name__ == "__main__":
-    world_size=[4,4]
-    word_size_real = [6,6]
     u = QAgentCar.MAX_SPEED
-    u_s = u*0.8
-    u_ss = u*0.6 #side stearing
-    # agent actions like: [[u_right,u_left, steering_cmd in rad]] then acthion_1 =   actions[0]
-    actions =  [[u,u,0],[u_s,u_s,0.3*np.pi],[u_s,u_s,-0.3*np.pi],[u_ss,u_ss,1.*np.pi],[u_ss,u_ss,-1.*np.pi]]
+    world_size=[4,4]
+    word_size_real = np.array(world_size) * 2
+    u_s = u*0.5
+    u_ss = u*0.2 #side strong
+    # u_b  = -u*0.25#back
+    # actions =  [[u,u,0],[u,u,0.2*np.pi],[u,u,-0.2*np.pi],[u_ss,u_ss,0.4*np.pi],[u_ss,u_ss,-0.4*np.pi],[u_b,u_b,0.4*np.pi],[u_b,u_b,-0.4*np.pi]]
+    #action like: [u_right,u_left, stearing_cmd in rad]
+    actions =  [[u,u,0],[u_s,u_s,0.2*np.pi],[u_s,u_s,-0.2*np.pi],[u_ss,u_ss,0.6*np.pi],[u_ss,u_ss,-0.6*np.pi]]
 
     qcar = QAgentCar(actions = actions,#action the agent can perform
                             x=1.5, y=1.5, theta=0.25*np.pi,radius =0.25 ,color ="green",  # init car pos
                             u =[[4,5,np.pi*0.2]],# single command mode for the SimpleCarMdl in [[u_1,u_2, stearing_cmd]]
-                            world_size = world_size,# world size for random postion after collisions
+                            world_size = word_size_real,# world size for random postion after collisions
                             hist_len = 2,
                             restore_wights_files = restore_wights_files,
                             test_wights_files =test_wights_files,#file to load test weights, if loaded no training
