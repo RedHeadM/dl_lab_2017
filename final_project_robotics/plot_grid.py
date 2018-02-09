@@ -1,12 +1,18 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+'''
+    File name: plot_grid.py
+    Abstract: plots the local view of the agent: occupancy gird
+    Author: Markus Merklinger
+'''
+
 import math
 from sys import platform as _platform
 import numpy as np
 
 from framework.world import PltWorld
 from framework.agent import PltMovingCircleAgent
-
 from framework.sensor import BumperSensor
-
 from aadc.simpleCarMdl import SimpleCarMdl
 from aadc.perceptionGirdSensor import PerceptionGridSensor
 # from aadc.tracks.track_circle import get_test_track, get_test_track_wall_polygon  # change track here
@@ -17,7 +23,7 @@ from framework.test import Cleaner
 from matplotlib.collections import PatchCollection
 import matplotlib.pyplot as plt  # call after pltworld import
 
-print("running sim gird mdl test")
+
 # sim params
 sim_time = 10
 sim_interval_s = 10
@@ -47,25 +53,6 @@ class AADCcarGridTester(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, Percep
         if col != BumperSensor.NONE:
             self.change_color()
 
-
-
-def generate_input(input_type, n_steps):
-    n_steps = int(math.floor(n_steps))
-    u = np.ones((n_steps, 3))
-    # assume const. v = 1m/s,  only change steering angle
-    if input_type == 0:
-        tmp = 1 * np.ones(n_steps)  # const. steering angle in rad
-        u[:, 2] = tmp
-        return u
-    if input_type == 1:
-        np.random.seed()
-        tmp = 5 * (np.random.rand(n_steps) - 0.5)
-        u[:, 2] = tmp
-        return u
-
-
-# car_u = generate_input(1, sim_time / sim_interval_s)#np.ones((int(math.floor(sim_time / sim_interval_s)), 3))
-
 start_pos, word_size_real, wall_elements = get_test_track(word_size)
 
 world = PltWorld(animation=True,
@@ -84,15 +71,15 @@ for el in wall_elements:
 
 #add cleaner to world and for plt later to see the grid
 CLEANER_SIZE = 0.2
-cleaner1 = Cleaner(x=1.5, y=3, wheelDistance=CLEANER_SIZE, theta=0, show_path=False)
+cleaner1 = Cleaner(x=1.5, y=3, wheelDistance=CLEANER_SIZE, theta=0, show_path=False, color="orange")
 cleaner1.clear_cmds()
-cleaner2 = Cleaner(x=4.5, y=4.5, wheelDistance=CLEANER_SIZE, theta=0, show_path=False)
+cleaner2 = Cleaner(x=4.5, y=4.5, wheelDistance=CLEANER_SIZE, theta=0, show_path=False,color="orange")
 cleaner2.clear_cmds()
 world.add_element(cleaner1)
 world.add_element(cleaner2)
 cleaners_plt =[]
-cleaner_plt_1 = Cleaner(x=1.5, y=3, wheelDistance=CLEANER_SIZE, theta=0, show_path=False)
-cleaner_plt_2 = Cleaner(x=4.5, y=4.5, wheelDistance=CLEANER_SIZE, theta=0, show_path=False)
+cleaner_plt_1 = Cleaner(x=1.5, y=3, wheelDistance=CLEANER_SIZE, theta=0, show_path=False,color="darkorange")
+cleaner_plt_2 = Cleaner(x=4.5, y=4.5, wheelDistance=CLEANER_SIZE, theta=0, show_path=False,color="darkorange")
 cleaners_plt.append(cleaner_plt_1)
 cleaners_plt.append(cleaner_plt_2)
 
@@ -137,16 +124,18 @@ fig, axarr = plt.subplots(1,2, sharex=True,figsize=(10, 5))
 for c in cleaners_plt:
     c.ui_init_drawables(fig,axarr[0],0,0)
     c.ui_update(fig,axarr[0],0,0)
-    c.patch.set_alpha(0.5)
-    c.line.set_alpha(0.5)
+    # c.patch.set_alpha(0.9)
+    # c.line.set_alpha(0.5)
 
 
 print("car_pos_data",car_pos_data[0])
-pos_car_gird_sample_point = Cleaner(x=1, y=1, wheelDistance=CLEANER_SIZE, theta=np.pi * 0.3, show_path=False,color="orange")
+
+#add car to plt
+pos_car_gird_sample_point = Cleaner(x=1, y=1, wheelDistance=CLEANER_SIZE, theta=np.pi * 0.3, show_path=False,color="blue")
 pos_car_gird_sample_point.ui_init_drawables(fig,axarr[1],0,0)
 pos_car_gird_sample_point.ui_update(fig,axarr[1],0,0)
-pos_car_gird_sample_point.patch.set_alpha(0.8)
-pos_car_gird_sample_point.line.set_alpha(0.5)
+# pos_car_gird_sample_point.patch.set_alpha(0.8)
+# pos_car_gird_sample_point.line.set_alpha(0.5)
 
 # plt walls again
 for g in get_test_track_wall_polygon(word_size):
@@ -188,10 +177,6 @@ grady = np.sin(theta)
 # polt car oriantation with arrow
 # axarr[1].quiver(car_pos_data[:, 0], car_pos_data[:, 1], gradx, grady, width=0.002, color='g',)
 
-
-
-
-
 for a in axarr:
     a.set_ylim([-0.25,5.1])
     a.set_xlim([-0.25,5.1])
@@ -203,4 +188,6 @@ for a in axarr:
     a.yaxis.set_ticks_position('none')
 fig.tight_layout()
 # plt.savefig(os.path.join(plt_folder, plt_file_name) + '.pdf', format='pdf', dpi=1000)#save as pdf first
-plt.show()
+
+plt.savefig('view.pdf', format='pdf', dpi=1000)
+#plt.show()

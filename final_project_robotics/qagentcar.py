@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 '''
-    File name: csv_plt.py
-    Abstract: Polt a csv file
+    File name: qagentcar.py
+    Abstract: qagent car for the simframework whith
+    occupancy gird, BumperSensor, car dynamic: bicycle  model
+
     Author: Markus Merklinger
-    Date created: 10/20/2017
-    Date last modified: 10/20/2017
     Python Version: 3.5
 '''
 __version__ = "1.0.0"
@@ -34,7 +34,7 @@ from  framework.utils.log import log
 class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGridSensor,DQNAgent):
     ''' agent run in the simframework: action take place in the simulation output stage'''
     DEBUG = True
-    MAX_SPEED = 1.
+    MAX_SPEED = 1.5
 
     def __init__(self,actions,grid_x_size,grid_y_size,radius, world_size, x=0, y=0, theta=np.pi, use_conv=True,hist_len = 2,test_wights_files = None, restore_wights_files = None,save_file="network.h5", **kwargs):
         self._actions = actions
@@ -171,8 +171,9 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         super().sim_end(step,dt)
         if not self.test_enabled and self._agent_vaild_training_steps:
             self.save()
-        if not len(self.test_run_collision_steps):
+        if not len(self.test_run_collision_steps) and self.test_enabled:
             #no collision in test run
+            print("agent no collision")
             self.test_run_collision_steps.append(step)
 
     def save(self):
