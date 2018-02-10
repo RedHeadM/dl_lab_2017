@@ -58,6 +58,7 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         self._world_size = world_size
         self._steps_since_last_collision = 0 # cnt the steps for print outs and vaild trainning samples
         self._agent_vaild_training_steps = 0 # training steps: enough data was in the state with history to add a training sample
+        self._agent_memory_added = 0 #cnt for multiple runs
         self._save_file = save_file
         if restore_wights_files is not None:
             log.info("weight restored: " + restore_wights_files)
@@ -74,7 +75,12 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
 
     def sim_init(self, simulation_duration, dt):
         super().sim_init(simulation_duration, dt)
+        self._steps_since_last_collision = 0
+        self.set_postion(self._init_pos)
+        if self._agent_memory_added < self.qagent.memory_size and not self.test_enabled:
+            log.info("filling qagent memory with random samples")
         self.test_run_collision_steps = []
+
 
     def sim_step_output(self, step, dt):
 
@@ -94,14 +100,16 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
 
         #wait untill agent has valid data is history after jump
         if self._steps_since_last_collision >= self.qagent.history_len+1 and not self.test_enabled:
-            self._agent_vaild_training_steps += 1
+
+            self._agent_memory_added += 1
             #ADD the data to the memory of the agent and replay
             next_reward = self.get_reward()
             is_terminate_state = False # here always false since next_state can be used
             #is_terminate_state = self.collistion() != BumperSensor.NONE
             #self.qagent.remember(self._state_with_history.reshape(-1),self.current_u_index,next_reward,self._next_state_with_history.reshape(-1),is_terminate_state)
             self.qagent.memory_store(self._state_with_history.reshape(-1),self.current_u_index,next_reward,self._next_state_with_history.reshape(-1),is_terminate_state)
-            if self._agent_vaild_training_steps > 2000:
+            if self._agent_memory_added > 2000:
+                self._agent_vaild_training_steps += 1
                 self.qagent.replay()#train the agent
 
         #Let the agent act on the current state
@@ -126,8 +134,10 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
             self._steps_since_last_collision = 0 #reset counter and fill history after jump
             super().sim_step_output(step, dt)
             #reset the agent at start pos
-            # self.set_postion(self._init_pos)
-            self.place_ramdom_in_world()
+            if self.test_enabled:
+                self.set_postion(self._init_pos)
+            else:
+                self.place_ramdom_in_world()
         else:
             # set the agent steering cmd:
             self.sim_output_set_next_u(next_cmd)
