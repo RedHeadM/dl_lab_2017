@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-    File name: csv_plt.py
-    Abstract: Polt a csv file based on https://github.com/keon/deep-q-learning/blob/master/ddqn.py
-    Author: Markus Merklinger
-    Date created: 10/20/2017
-    Date last modified: 10/20/2017
-    Python Version: 3.5
+    File name: qagent.py
+    Abstract: q learning agent
+    Author: Markus Merklinger and Lior Fuks
 '''
 __version__ = "1.0.0"
 import random
@@ -27,7 +24,7 @@ class DQNAgent:
         self.epsilon = 1.0  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
-        self.learning_rate = 0.001
+        self.learning_rate = 0.00001#0.001
         self.use_conv = use_conv
         self.last_loss_replay = 0
         self.history_len = state_size[2]

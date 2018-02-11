@@ -54,7 +54,6 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         self.current_u_index = 0
         self._state_with_history = np.zeros((hist_len,(grid_x_size* grid_y_size)))
         self._next_state_with_history = np.copy(self._state_with_history)
-        self._cmds_last = collections.deque(maxlen=5)#last cmds to observe what the agent is doing without the animation
         self._world_size = world_size
         self._steps_since_last_collision = 0 # cnt the steps for print outs and vaild trainning samples
         self._agent_vaild_training_steps = 0 # training steps: enough data was in the state with history to add a training sample
@@ -117,10 +116,10 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
         #no expporation in action if self.test_enabled
         self.current_u_index = self.qagent.act(self._state_with_history,enable_exploration = not self.test_enabled)
         next_cmd = self._actions[self.current_u_index]
-        self._cmds_last.append(next_cmd)# save last cmds to see hat agent is doing without animation
+
 
         #update_target_model and save
-        if step % 50 == 0 and step !=0 and not self.test_enabled:
+        if self._agent_vaild_training_steps % 50 == 0 and step !=0 and not self.test_enabled:
             self.qagent.update_target_model()
             # self.save()
 
@@ -129,7 +128,6 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
             if self.test_enabled:
                 self.test_run_collision_steps.append(self._steps_since_last_collision)
             # if self._steps_since_last_collision >= self.qagent.history_len+1:
-                # log.info("collistion! setps since last collision: {} train_stesp {}, last loss {} epsilon: {:.2} last cmds {}".format(self._steps_since_last_collision,self._agent_vaild_training_steps,self.qagent.last_loss_replay,self.qagent.epsilon,self._cmds_last))
                 # log.info("collistion! setps since last collision: {} train_stesp {}, loss sum last batch: {} epsilon: {:.2}".format(self._steps_since_last_collision,self._agent_vaild_training_steps,self.qagent.last_loss_replay,self.qagent.epsilon))
             self._steps_since_last_collision = 0 #reset counter and fill history after jump
             super().sim_step_output(step, dt)
@@ -149,14 +147,13 @@ class QAgentCar(PltMovingCircleAgent, SimpleCarMdl, BumperSensor, PerceptionGrid
             self.save()
         if not len(self.test_run_collision_steps) and self.test_enabled:
             #no collision in test run
-            print("agent no collision")
+            log.info("test run with no collision")
             self.test_run_collision_steps.append(step)
 
     def save(self):
-        self.qagent.save(self._save_file)
-        log.info("traing steps: {} saved to  : {}".format(self._agent_vaild_training_steps,self._save_file))
-
-
+        if self._save_file is not None:
+            self.qagent.save(self._save_file)
+            log.info("traing steps: {} saved to  : {}".format(self._agent_vaild_training_steps,self._save_file))
 
     def place_ramdom_in_world(self):
         self.place_random(x_max=self._world_size[0] * 4 / 5, x_min=self._world_size[0] * 1 / 5,
